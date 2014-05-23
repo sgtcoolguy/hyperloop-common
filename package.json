@@ -38,9 +38,6 @@
       "url": "http://github.com/sgtcoolguy"
     }
   ],
-  "bin": {
-    "hyperloop": "./bin/hyperloop"
-  },
   "scripts": {
     "test": "grunt test"
   },
