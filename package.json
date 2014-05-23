@@ -44,7 +44,7 @@
   "main": "./index",
   "repository": {
     "type": "git",
-    "url": "https://github.com/appcelerator/hyperloop.git"
+    "url": "https://github.com/appcelerator/hyperloop-common.git"
   },
   "keywords": [
     "hyperloop",
