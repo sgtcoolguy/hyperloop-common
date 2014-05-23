@@ -1,0 +1,89 @@
+{
+  "name": "hyperloop-common",
+  "preferGlobal": false,
+  "version": "0.2.0",
+  "author": "Appcelerator <support@appcelerator.com>",
+  "description": "hyperloop compiler common libraries shared between CLI and platforms",
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Jeff Haynie",
+      "url": "https://github.com/jhaynie"
+    },
+    {
+      "name": "Tony Lukasavage",
+      "url": "https://github.com/tonylukasavage"
+    },
+    {
+      "name": "Matt Langston",
+      "url": "https://github.com/matt-langston"
+    },
+    {
+      "name": "Dawson Toth",
+      "url": "https://github.com/dawsontoth/"
+    },
+    {
+      "name": "Kota Iguchi",
+      "url": "https://github.com/infosia"
+    },
+    {
+      "name": "Eric Wing"
+    },
+    {
+      "name": "Russ McMahon",
+      "url": "https://github.com/mtnlife999"
+    },
+    {
+      "name": "Christopher Williams",
+      "url": "http://github.com/sgtcoolguy"
+    }
+  ],
+  "bin": {
+    "hyperloop": "./bin/hyperloop"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "main": "./index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appcelerator/hyperloop.git"
+  },
+  "keywords": [
+    "hyperloop",
+    "titanium",
+    "appcelerator"
+  ],
+  "dependencies": {
+    "async": "0.2.9",
+    "temp": "0.6.0",
+    "underscore": "1.5.2",
+    "ejs": "0.8.4",
+    "byline": "3.1.2",
+    "stream-buffers": "0.2.5",
+    "wrench": "1.5.4",
+    "colors": "0.6.2",
+    "semver": "2.2.1",
+    "node-uuid": "1.4.1",
+    "node-appc": "0.1.30",
+    "uglify-js": "^2.4.13",
+    "prompt": "~0.2.12"
+  },
+  "optionalDependencies": {
+    "zipper": "0.3.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "mocha": "~1.14.0",
+    "should": "~3.3.1",
+    "istanbul": "~0.1.44",
+    "grunt-mocha-test": "~0.7.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-jshint": "~0.7.1",
+    "nock": "~0.23.0",
+    "node-appc": "~0.1.30"
+  },
+  "engines": {
+    "node": ">=0.10.15"
+  }
+}
