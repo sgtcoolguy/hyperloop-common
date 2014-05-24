@@ -677,6 +677,7 @@ EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopTranslationUnitCallback
     }
     va_end(vl);
     translationUnits.push_back(Appcelerator::TranslationUnit(callback,map));
+    return true;
 }
 
 static TranslationUnitList::const_iterator findTranslationUnit (const char *filepath) 
