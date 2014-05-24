@@ -9,6 +9,7 @@ module.exports = _.extend(hl,{
 	hook: require('./lib/hook'),
 	unit: require('./lib/unit'),
 	spinner: require('./lib/spinner'),
-	Command: require('./lib/command')
+	Command: require('./lib/command'),
+	getCommands: hl.getCommands,
+	getCommand: hl.getCommand
 });
-
