@@ -5,12 +5,25 @@ var should = require('should'),
 
 describe('#types', function(){
 
+	afterEach(function(){
+		typelib.reset();
+		typelib.metabase = null;
+		typelib.platform = null;
+	});
+
+	it('should not work without metabase',function(){
+		(function(){
+			typelib.resolveType('hello');
+		}).should.throw();
+	});
+
 	['int','float','double','long','long long','long double','short'].forEach(function(name){
 		['','signed','unsigned','const','const signed','const unsigned'].forEach(function(prepend){
 			['','*','**'].forEach(function(postpend){
 				var value = (prepend+' '+name+' '+postpend).trim();
 				it(value, function() {
-					var type = typelib.resolveType({}, value);
+					typelib.metabase = {};
+					var type = typelib.resolveType(value);
 					type.isJSNumber().should.be.true;
 					type.isNativePrimitive().should.be.true;
 					type.isConst().should.equal(/^const/.test(value));
@@ -41,7 +54,8 @@ describe('#types', function(){
 	});
 
 	it('null',function(){
-		var type = typelib.resolveType({}, 'null');
+		typelib.metabase = {};
+		var type = typelib.resolveType('null');
 		type.isJSNull().should.be.true;
 		type.isNativeNull().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeNull(ctx)');
@@ -49,7 +63,8 @@ describe('#types', function(){
 	});
 
 	it('undefined', function(){
-		var type = typelib.resolveType({}, 'undefined');
+		typelib.metabase = {};
+		var type = typelib.resolveType('undefined');
 		type.isJSUndefined().should.be.true;
 		type.isNativeVoid().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeUndefined(ctx)');
@@ -57,7 +72,8 @@ describe('#types', function(){
 	});
 
 	it('bool', function() {
-		var type = typelib.resolveType({}, 'bool');
+		typelib.metabase = {};
+		var type = typelib.resolveType('bool');
 		type.isJSBoolean().should.be.true;
 		type.isNativeBoolean().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeBoolean(ctx,value)');
@@ -65,7 +81,8 @@ describe('#types', function(){
 	});
 
 	it('void', function(){
-		var type = typelib.resolveType({}, 'void');
+		typelib.metabase = {};
+		var type = typelib.resolveType('void');
 		type.isJSUndefined().should.be.true;
 		type.isNativeVoid().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeUndefined(ctx)');
@@ -73,7 +90,8 @@ describe('#types', function(){
 	});
 
 	it('void *', function(){
-		var type = typelib.resolveType({}, 'void *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('void *');
 		type.isJSObject().should.be.true;
 		type.isNativePointer().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
@@ -90,7 +108,8 @@ describe('#types', function(){
 	});
 
 	it('const void *', function(){
-		var type = typelib.resolveType({}, 'const void *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const void *');
 		type.isJSObject().should.be.true;
 		type.isNativePointer().should.be.true;
 		type.isConst().should.be.true;
@@ -105,7 +124,8 @@ describe('#types', function(){
 	});
 
 	it('char', function(){
-		var type = typelib.resolveType({}, 'char');
+		typelib.metabase = {};
+		var type = typelib.resolveType('char');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		var preamble = [], cleanup = [];
@@ -118,7 +138,8 @@ describe('#types', function(){
 	});
 
 	it('signed char', function(){
-		var type = typelib.resolveType({}, 'signed char');
+		typelib.metabase = {};
+		var type = typelib.resolveType('signed char');
 		type.isJSBoolean().should.be.true;
 		type.isNativeBoolean().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeBoolean(ctx,value)');
@@ -126,7 +147,8 @@ describe('#types', function(){
 	});
 
 	it('char *', function(){
-		var type = typelib.resolveType({}, 'char *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('char *');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		type.isPointer().should.be.true;
@@ -140,7 +162,8 @@ describe('#types', function(){
 	});
 
 	it('const char *', function(){
-		var type = typelib.resolveType({}, 'const char *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const char *');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		type.isPointer().should.be.true;
@@ -155,7 +178,8 @@ describe('#types', function(){
 	});
 
 	it('char []', function(){
-		var type = typelib.resolveType({}, 'char []');
+		typelib.metabase = {};
+		var type = typelib.resolveType('char []');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		var preamble = [], cleanup = [];
@@ -169,7 +193,8 @@ describe('#types', function(){
 	});
 
 	it('char [10]', function(){
-		var type = typelib.resolveType({}, 'char [10]');
+		typelib.metabase = {};
+		var type = typelib.resolveType('char [10]');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		var preamble = [], cleanup = [];
@@ -183,7 +208,8 @@ describe('#types', function(){
 	});
 
 	it('const char []', function(){
-		var type = typelib.resolveType({}, 'const char []');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const char []');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		type.isConst().should.be.true;
@@ -198,7 +224,8 @@ describe('#types', function(){
 	});
 
 	it('const char [10]', function(){
-		var type = typelib.resolveType({}, 'const char [10]');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const char [10]');
 		type.isJSString().should.be.true;
 		type.isNativeString().should.be.true;
 		type.isConst().should.be.true;
@@ -213,7 +240,8 @@ describe('#types', function(){
 	});
 
 	it('enum Foo', function(){
-		var type = typelib.resolveType({}, 'enum Foo');
+		typelib.metabase = {};
+		var type = typelib.resolveType('enum Foo');
 		type.isJSNumber().should.be.true;
 		type.isNativePrimitive().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeNumber(ctx,static_cast<double>(value))');
@@ -221,7 +249,8 @@ describe('#types', function(){
 	});
 
 	it('struct Foo', function() {
-		var type = typelib.resolveType({}, 'struct Foo');
+		typelib.metabase = {};
+		var type = typelib.resolveType('struct Foo');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
@@ -240,7 +269,8 @@ describe('#types', function(){
 	});
 
 	it('struct Foo *', function() {
-		var type = typelib.resolveType({}, 'struct Foo *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('struct Foo *');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -260,7 +290,8 @@ describe('#types', function(){
 	});
 
 	it('const struct Foo *', function() {
-		var type = typelib.resolveType({}, 'const struct Foo *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const struct Foo *');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -292,7 +323,8 @@ describe('#types', function(){
 	     		}
 			}
 		};
-		var type = typelib.resolveType(metabase, '__int32_t');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('__int32_t');
 		type.isJSNumber().should.be.true;
 		type.isNativePrimitive().should.be.true;
 		type.toJSBody('value').should.equal('JSValueMakeNumber(ctx,static_cast<double>(value))');
@@ -324,7 +356,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CGRect');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CGRect');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
@@ -342,7 +375,8 @@ describe('#types', function(){
 	});
 
 	it.skip('id',function() {
-		var type = typelib.resolveType({}, 'id', 'ios');
+		typelib.metabase = {};
+		var type = typelib.resolveType('id');
 		type.isJSObject().should.be.true;
 		type.isNativeObject().should.be.true;
 	});
@@ -375,7 +409,8 @@ describe('#types', function(){
 				}
 			}
 		}
-		var type = typelib.resolveType(metabase, 'SEL');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('SEL');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -407,7 +442,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CFNullRef');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CFNullRef');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -446,7 +482,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, '__CFAllocator');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('__CFAllocator');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -480,7 +517,8 @@ describe('#types', function(){
 				}			
  			}
 		};
-		var type = typelib.resolveType(metabase, 'CFStringRef');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CFStringRef');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.isPointer().should.be.true;
@@ -522,7 +560,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CFAllocatorCopyDescriptionCallBack');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CFAllocatorCopyDescriptionCallBack');
 		type.isJSObject().should.be.true;
 		type.isNativeFunctionPointer().should.be.true;
 		type.isPointer().should.be.false;
@@ -615,7 +654,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'NSComparator');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('NSComparator');
 		type.isJSObject().should.be.true;
 		type.isNativeBlock().should.be.true;
 		type.isPointer().should.be.false;
@@ -657,7 +697,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, '_opaque_pthread_attr_t');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('_opaque_pthread_attr_t');
 		var preamble = [], cleanup = [], declare = [];
 		type.toJSBody('value',preamble,cleanup,declare).should.be.equal('_opaque_pthread_attr_t_ToJSValue(ctx,value,exception)');
 		preamble.should.be.empty;
@@ -718,7 +759,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase, 'SFNTLookupFormatSpecificHeader');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('SFNTLookupFormatSpecificHeader');
 		type.isNativeUnion().should.be.true;
 		type.isJSObject().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
@@ -779,7 +821,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CGAffineTransform');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CGAffineTransform');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.toString().should.be.equal('CGAffineTransform');
@@ -821,8 +864,9 @@ describe('#types', function(){
 				}				
 			}
 		}
+		typelib.metabase = metabase;
 		// test where subtype starts with struct but not type
-		var type = typelib.resolveType(metabase, 'MKTileOverlayPath');
+		var type = typelib.resolveType('MKTileOverlayPath');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
 		type.toString().should.be.equal('MKTileOverlayPath');
@@ -842,8 +886,9 @@ describe('#types', function(){
 				}				
 			}
 		};
+		typelib.metabase = metabase;
 		// test where typedef to void
-		var type = typelib.resolveType(metabase, 'GLvoid');
+		var type = typelib.resolveType('GLvoid');
 		type.isJSUndefined().should.be.true;
 		type.isNativeVoid().should.be.true;
 	});
@@ -869,7 +914,8 @@ describe('#types', function(){
 			}
 		};
 
-		var type = typelib.resolveType(metabase, 'struct OpaqueMIDIDeviceList *');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('struct OpaqueMIDIDeviceList *');
 		type.isNativeStruct().should.be.true;
 		type.toString().should.be.equal('struct OpaqueMIDIDeviceList *');
 		type.toName().should.be.equal('struct OpaqueMIDIDeviceList *');
@@ -888,12 +934,13 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase, 'NSStringEncoding');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('NSStringEncoding');
 		type.isNativePrimitive().should.be.true;
 		type.isJSNumber().should.be.true;
 		type.toString().should.be.equal('NSStringEncoding');
 
-		type = typelib.resolveType(metabase, 'const NSStringEncoding *');
+		type = typelib.resolveType('const NSStringEncoding *');
 		type.isNativePrimitive().should.be.true;
 		type.isJSNumber().should.be.true;
 		type.isPointer().should.be.true;
@@ -920,10 +967,11 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CGPath');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CGPath');
 		type.toString().should.be.equal('struct CGPath *');
 
-		type = typelib.resolveType(metabase, 'const struct CGPath *');
+		type = typelib.resolveType('const struct CGPath *');
 		type.toString().should.be.equal('const struct CGPath *');
 		type.isConst().should.be.true;
 		type.isPointer().should.be.true;
@@ -970,7 +1018,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'NSGlyphProperty');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('NSGlyphProperty');
 		type.toString().should.be.equal('NSGlyphProperty');
 	});
 
@@ -987,7 +1036,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CFPropertyListRef');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CFPropertyListRef');
 		type.toString().should.be.equal('CFPropertyListRef');
 		type.toName().should.be.equal('CFPropertyListRef');
 		type.getAsKey().should.be.equal('CFPropertyListRef');
@@ -1010,7 +1060,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase, '__m64');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('__m64');
 		type.isNativePrimitive().should.be.true;
 		type.isJSNumber().should.be.true;
 		type.toString().should.equal('__m64');
@@ -1050,7 +1101,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase, 'CMAcceleration');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CMAcceleration');
 		type.isNativeStruct().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
 		type.toJSBody('value',preamble,cleanup,declare).should.be.equal('CMAcceleration_ToJSValue(ctx,value,exception)');
@@ -1123,7 +1175,8 @@ describe('#types', function(){
 	});
 
 	it('const int *', function(){
-		var type = typelib.resolveType({}, 'const int *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const int *');
 		type.isNativePointer().should.be.false;
 		type.isNativePrimitive().should.be.true;
 		type.toNativeBody('value').should.be.equal('static_cast<int *>(HyperloopJSValueToVoidPointer(ctx,value,exception))');
@@ -1177,15 +1230,17 @@ describe('#types', function(){
 				}			
 			}
 		};
-		var type = typelib.resolveType(metabase, 'SLRequestMethod');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('SLRequestMethod');
 		type.toString().should.equal('SLRequestMethod');
-		type = typelib.resolveType(metabase, 'SLRequestMethod');
+		type = typelib.resolveType('SLRequestMethod');
 		type.toString().should.equal('SLRequestMethod');
 		type.toNativeBody('value').should.equal('static_cast<SLRequestMethod>(JSValueToNumber(ctx,value,exception))');
 	});
 
 	it('const char *', function(){
-		var type = typelib.resolveType({}, 'const char *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('const char *');
 		var preamble = [], cleanup = [], declares = [];
 		type.toNativeBody('arguments[1]',preamble,cleanup,declares).should.equal('arguments_1_buf');
 		preamble.should.not.be.empty;
@@ -1229,10 +1284,11 @@ describe('#types', function(){
 				}			
 			}
 		};
-		var type = typelib.resolveType(metabase, 'union _GLKMatrix4');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('union _GLKMatrix4');
 		type.toString().should.equal('union _GLKMatrix4');
 		type.isNativeUnion().should.be.true;
-		type = typelib.resolveType(metabase, 'GLKMatrix4');
+		type = typelib.resolveType('GLKMatrix4');
 		type.isNativeUnion().should.be.true;
 	});
 
@@ -1249,7 +1305,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'const CGFloat *');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('const CGFloat *');
 		type.isNativePrimitive().should.be.true;
 		type.isJSNumber().should.be.true;
 		type.toJSBody('value').should.be.equal('HyperloopVoidPointerToJSValue(ctx,static_cast<void *>(const_cast<float *>(value)),exception)');
@@ -1265,7 +1322,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'UIColor *', 'ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('UIColor *');
 		type.isNativeObject().should.be.true;
 		type.isJSObject().should.be.true;
 		type.toName().should.be.equal('UIColor');
@@ -1282,7 +1340,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'UIColor **', 'ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('UIColor **', 'ios');
 		type.isNativePointer().should.be.true;
 		type.isJSObject().should.be.true;
 		type.toName().should.be.equal('UIColor');
@@ -1300,7 +1359,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'const UIColor *', 'ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('const UIColor *');
 		type.isNativeObject().should.be.true;
 		type.isJSObject().should.be.true;
 		type.toName().should.be.equal('UIColor');
@@ -1317,7 +1377,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase, 'const UIColor **', 'ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('const UIColor **');
 		type.isNativePointer().should.be.true;
 		type.isJSObject().should.be.true;
 		type.toName().should.be.equal('UIColor');
@@ -1327,7 +1388,8 @@ describe('#types', function(){
 	});
 
 	it('unsigned char *', function(){
-		var type = typelib.resolveType({},'unsigned char *');
+		typelib.metabase = {};
+		var type = typelib.resolveType('unsigned char *');
 		type.toString().should.equal('unsigned char *');
 		type.toName().should.equal('unsigned char *');
 	});
@@ -1351,7 +1413,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase,'struct __CVBuffer *');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('struct __CVBuffer *');
 		type.toString().should.equal('struct __CVBuffer *');
 		type.toName().should.equal('struct __CVBuffer *');
 	});
@@ -1369,7 +1432,8 @@ describe('#types', function(){
 				}				
 			}
 		};
-		var type = typelib.resolveType(metabase,'CVImageBufferRef');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CVImageBufferRef');
 		type.toString().should.equal('CVImageBufferRef');
 		type.toName().should.equal('CVImageBufferRef');
 		type.isPointer().should.be.true;
@@ -1384,7 +1448,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase,'NSFetchedResultsSectionInfo','ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('NSFetchedResultsSectionInfo');
 		type.toString().should.equal('NSObject <NSFetchedResultsSectionInfo> *');
 	});
 
@@ -1396,7 +1461,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase,'SKStoreProductViewController','ios');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('SKStoreProductViewController');
 		type.toString().should.equal('SKStoreProductViewController *');
 	});
 
@@ -1425,7 +1491,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase,'CLLocationCoordinate2D');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('CLLocationCoordinate2D');
 		var preamble = [], cleanup = [], declare = [];
 		type.toNativeBody("value",preamble,cleanup,declare).should.equal('JSValueTo_CLLocationCoordinate2D(ctx,value,exception)');
 		preamble.should.be.empty;
@@ -1454,7 +1521,8 @@ describe('#types', function(){
 				}
 			}
 		};
-		var type = typelib.resolveType(metabase,'const NSStringEncoding *');
+		typelib.metabase = metabase;
+		var type = typelib.resolveType('const NSStringEncoding *');
 		var preamble = [], cleanup = [], declare = [];
 		type.toJSBody("value",preamble,cleanup,declare).should.equal('HyperloopVoidPointerToJSValue(ctx,static_cast<void *>(const_cast<NSUInteger *>(value)),exception)');
 		preamble.should.be.empty;
