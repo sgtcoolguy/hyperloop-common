@@ -5,6 +5,12 @@ var should = require('should'),
 
 describe('#types', function(){
 
+	before(function(){
+		typelib.reset();
+		typelib.metabase = null;
+		typelib.platform = null;
+	});
+
 	afterEach(function(){
 		typelib.reset();
 		typelib.metabase = null;
