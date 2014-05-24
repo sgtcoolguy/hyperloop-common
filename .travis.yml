@@ -2,6 +2,10 @@ language: node_js
 node_js:
 - 0.10.15
 - '0.11'
+before_install:
+- sudo apt-get install libzip-dev
+before_script:
+- npm install -g grunt-cli
 notifications:
   flowdock:
     secure: jeOQrhniAUyoMu/EZnj5L1t1qY7y52yDjO1vfG4tSmT9la97DtJEILF724KPgrZ58XeW7PZTejTLSemOREJYhMWmFoq5jJAaDkuyrp0K7Eg71HlwabHpNE5grYu1EHZIylt19+sTPsXd8mKqY6Euzu2pB650Y3Noi7J6fhzqvzs=
