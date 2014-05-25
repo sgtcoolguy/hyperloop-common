@@ -1,7 +1,7 @@
 {
   "name": "hyperloop-common",
   "preferGlobal": false,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Appcelerator <support@appcelerator.com>",
   "description": "hyperloop compiler common libraries shared between CLI and platforms",
   "license": "Apache-2.0",
