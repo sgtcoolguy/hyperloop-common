@@ -1,5 +1,5 @@
 /**
- * compiler specs
+ * base64 specs
  */
 
 var should = require('should'),
