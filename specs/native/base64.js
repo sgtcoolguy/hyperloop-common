@@ -12,7 +12,7 @@ var should = require('should'),
 
 describe("base64", function(){
 
-	
+
 	it("should be able to compile and test base64", function(done){
 		clang.should.not.be.null;
 
@@ -20,7 +20,7 @@ describe("base64", function(){
 			config = {
 				srcfiles: [],
 				outdir: build_dir,
-				cflags: [ '-I"'+path.join(__dirname,'../../templates')+'"' ]
+				cflags: [ '-I"'+path.join(__dirname,'../../templates')+'"', '-DHL_TEST' ]
 			},
 			main = [
 				'#include <base64.h>',

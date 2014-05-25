@@ -26,7 +26,11 @@
    http://www.adp-gmbh.ch/cpp/common/base64.html
 
 */
+#ifndef HL_TEST
 #include <hyperloop.h>
+#else
+#include <base64.h>
+#endif
 
 static const std::string base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
