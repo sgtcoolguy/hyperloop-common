@@ -11,5 +11,6 @@ module.exports = _.extend(hl,{
 	spinner: require('./lib/spinner'),
 	Command: require('./lib/command'),
 	getCommands: hl.getCommands,
-	getCommand: hl.getCommand
+	getCommand: hl.getCommand,
+	dirname: __dirname
 });
