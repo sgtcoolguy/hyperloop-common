@@ -1,4 +1,4 @@
-# Hyperloop ∞ [![Build Status](https://travis-ci.org/appcelerator/hyperloop-common.png)](https://travis-ci.org/appcelerator/hyperloop-common)
+# Hyperloop ∞ [![Build Status](https://magnum.travis-ci.com/appcelerator/hyperloop-common.svg?token=xjwxUDk3aUJaLhguTqyB&branch=master)](https://magnum.travis-ci.com/appcelerator/hyperloop-common)
 
 Hyperloop is a next-generation compiler that converts JavaScript source code into native code for targeting different native OS platforms. 
 
