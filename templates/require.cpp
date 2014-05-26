@@ -34,6 +34,12 @@ namespace Appcelerator
         JSObjectRef getParent() const { return parent; }
         JSObjectRef getChildren() const { return children; }
         JSObjectRef getExports() const { return exports; }
+        void setExports(JSObjectRef newExports) 
+        { 
+            JSValueUnprotect(ctx, exports); 
+            exports = newExports;
+            JSValueProtect(ctx,exports);
+        }
         void setLoaded() { loaded = true; }
         bool isLoaded() { return loaded; }
         void addChild(const JSObjectRef & child);
@@ -546,10 +552,20 @@ JSValueRef ModuleDirname (JSContextRef ctx, JSObjectRef object, JSStringRef prop
 /**
  * return the modules exports property
  */
-JSValueRef ModuleExports (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception)
+JSValueRef ModuleExportsGet (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception)
 {
     auto module = JSObjectRefToModule(ctx,object,exception);
     return module->getExports();
+}
+
+/**
+ * set the modules exports property
+ */
+bool ModuleExportsSet (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value, JSValueRef* exception)
+{
+    auto module = JSObjectRefToModule(ctx,object,exception);
+    module->setExports(JSValueToObject(ctx,value,exception));
+    return true;
 }
 
 /**
@@ -577,7 +593,7 @@ static JSStaticFunction StaticModuleFunctions[] = {
 
 static JSStaticValue StaticModuleProperties [] = {
     { "id", ModuleId, 0, kJSPropertyAttributeReadOnly|kJSPropertyAttributeDontEnum},
-    { "exports", ModuleExports, 0, kJSPropertyAttributeReadOnly|kJSPropertyAttributeDontEnum},
+    { "exports", ModuleExportsGet, ModuleExportsSet, kJSPropertyAttributeDontEnum},
     { "filename", ModuleFilename, 0, kJSPropertyAttributeReadOnly|kJSPropertyAttributeDontEnum},
     { "parent", ModuleParent, 0, kJSPropertyAttributeReadOnly|kJSPropertyAttributeDontEnum},
     { "children", ModuleChildren, 0, kJSPropertyAttributeReadOnly|kJSPropertyAttributeDontEnum},

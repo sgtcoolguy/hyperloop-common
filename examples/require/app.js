@@ -12,7 +12,8 @@ var a = require('./a'),
 	k = require('d'),
 	l = require('e'),
 	m = require('f'),
-	z = require('/a');
+	z = require('/a'),
+	fn = require('./d');
 
 console.log("a should be 1 =>",a.foo());
 console.log("b should be 2 =>",b.foo());
@@ -25,6 +26,7 @@ console.log("k should be 4 =>",k.foo());
 console.log("l should be 5 =>",l.foo());
 console.log("m should be 1 =>",m.foo());
 console.log("z should be 1 =>",z.foo());
+console.log("fn should be 10 =>",fn());
 
 
 try {
