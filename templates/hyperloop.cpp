@@ -28,9 +28,21 @@ static JSContextGroupRef globalContextGroupRef = nullptr;
  *
  * called when our native object is garbarge collected by VM
  */
+static void Initializer(JSContextRef context, JSObjectRef object)
+{
+    void *pointer = JSObjectGetPrivate(object);
+    HyperloopPointerSetJSValueRef(pointer,object);
+}
+
+/**
+ * internal
+ *
+ * called when our native object is garbarge collected by VM
+ */
 static void Finalizer(JSObjectRef object)
 {
     auto po = reinterpret_cast<Hyperloop::NativeObject<void *> *>(object);
+    HyperloopRemovePointerJSValueRef(po->getObject());
     po->release();
 }
 
@@ -299,8 +311,14 @@ EXPORTAPI JSObjectRef HyperloopVoidPointerToJSValue(JSContextRef ctx, void *poin
     {
         JSClassDefinition def = kJSClassDefinitionEmpty;
         def.finalize = Finalizer;
+        def.initialize = Initializer;
         def.className = "void *";
         ref = JSClassCreate(&def);
+    }
+    auto v = HyperloopPointerToJSValueRef(pointer);
+    if (v!=nullptr)
+    {
+        return JSValueToObject(ctx,v,exception);
     }
     return JSObjectMake(ctx, ref, new Hyperloop::NativeObject<void *>(pointer));
 }

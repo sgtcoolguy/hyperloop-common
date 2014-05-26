@@ -121,12 +121,29 @@ EXPORTAPI JSValueRef HyperloopModuleRequire(JSGlobalContextRef ctx, JSValueRef *
 EXPORTAPI bool HyperloopJSValueIsArray(JSContextRef ctx, JSValueRef value);
 
 typedef JSValueRef (*HyperloopTranslationUnitCallback)(JSGlobalContextRef ctx, const JSObjectRef & parent, const char *path, JSValueRef *exception);
+typedef JSValueRef (*HyperloopJSValueRefCallback)(void *ptr);
+typedef void (*HyperloopJSValueRemoveCallback)(void *ptr);
+typedef void (*HyperloopJSValueSetCallback)(void *ptr, JSValueRef value);
 
 /**
  * called by a translation unit to register its compiled code
  */
-EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopTranslationUnitCallback callback, size_t count, ...);
+EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopJSValueRefCallback refCallback, HyperloopJSValueSetCallback setCallback, HyperloopJSValueRemoveCallback remCallback, HyperloopTranslationUnitCallback callback, size_t count, ...);
 
+/**
+ * called to attempt to return a JSValueRef for a given pointer
+ */
+EXPORTAPI JSValueRef HyperloopPointerToJSValueRef(void *pointer);
+
+/**
+ * called to set JSValueRef for a given pointer
+ */
+EXPORTAPI void HyperloopPointerSetJSValueRef(void *pointer, JSValueRef value);
+
+/**
+ * called to remove a pointer to JSValueRef mapping
+ */
+EXPORTAPI void HyperloopRemovePointerJSValueRef(void *pointer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Platforms implement
