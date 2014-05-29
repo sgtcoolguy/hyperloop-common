@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <stdarg.h>
 
 #ifndef REQUIRE_DEBUG
 #define REQUIRE_DEBUG 0
