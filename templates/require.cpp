@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <stdarg.h>
 
 #ifndef REQUIRE_DEBUG
 #define REQUIRE_DEBUG 0
@@ -729,7 +730,7 @@ EXPORTAPI void HyperloopRemovePointerJSValueRef(void *pointer)
 static TranslationUnitList::const_iterator findTranslationUnit (const char *filepath) 
 {
     std::string path(filepath);
-    return find_if(translationUnits.begin(), translationUnits.end(), [&path] (typename TranslationUnitList::const_reference tu)
+    return find_if(translationUnits.begin(), translationUnits.end(), [&path] (TranslationUnitList::const_reference tu)
     {
         if (tu.sourceExists(path))
         {
