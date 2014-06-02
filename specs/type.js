@@ -1259,5 +1259,28 @@ describe('#types', function(){
 		type.isPointer().should.be.true;
 	});
 
+	it('float64', function(){
+		typelib.metabase = {};
+		var type = typelib.resolveType('float64');
+		type.toString().should.equal('float64');
+		type.toName().should.equal('float64');
+		type.isPointer().should.be.false;
+	});
+
+	it('float64*', function(){
+		typelib.metabase = {};
+		var type = typelib.resolveType('float64 *');
+		type.toString().should.equal('float64 *');
+		type.toName().should.equal('float64 *');
+		type.isPointer().should.be.true;
+	});
+
+	it('const float64*', function(){
+		typelib.metabase = {};
+		var type = typelib.resolveType('const float64 *');
+		type.toString().should.equal('const float64 *');
+		type.toName().should.equal('const float64 *');
+		type.isPointer().should.be.true;
+	});
 });
 
