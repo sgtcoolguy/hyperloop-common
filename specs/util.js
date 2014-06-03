@@ -424,4 +424,21 @@ describe('lib/util.js', function() {
 		});
 	});
 
+	describe('#rtrim', function() {
+		it('should trim trailing newline', function(){
+			util.rtrim('foo\n').should.equal('foo');
+			util.rtrim('foo\n\n').should.equal('foo');
+			util.rtrim('foo\nbar\n').should.equal('foo\nbar');
+		});
+		it('should trim trailing carraige return', function(){
+			util.rtrim('foo\r').should.equal('foo');
+			util.rtrim('foo\r\r').should.equal('foo');
+			util.rtrim('foo\rbar\r').should.equal('foo\rbar');
+		});
+		it('should not trim spaces', function(){
+			util.rtrim('foo  ').should.equal('foo  ');
+			util.rtrim('foo\t').should.equal('foo\t');
+		});
+	});
+
 });

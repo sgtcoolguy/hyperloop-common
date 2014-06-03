@@ -99,6 +99,26 @@ describe('lib/log.js', function() {
 				should.not.exist(_message);
 			});
 
+			it('exclude new line', function() {
+				// mock console.log here, because it interferes with test reporting
+				// if we do it in beforeEach() and afterEach()
+				var _log = console.log, _message;
+				console.log = function() {
+					_message = arguments[0];
+				};
+
+				// set log level and color usage, execute
+				log.level = 'info';
+				log.useColor = false;
+				log['info']('foo\n');
+
+				// reset console.log
+				console.log = _log;
+
+				// run the test
+				_message.should.equal('[INFO]  foo');
+			});
+
 		});
 
 	});
