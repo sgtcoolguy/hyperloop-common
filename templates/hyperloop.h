@@ -9,10 +9,6 @@
 #ifndef __HYPERLOOP_HEADER__
 #define __HYPERLOOP_HEADER__
 
-#if defined(_WIN32)
-#define __WINDOWS__ _WIN32
-#endif
-
 #ifndef HYPERLOOP_EXCLUDE_JSCORE_IMPORT
 #ifdef HL_IOS
 #include <JavaScriptCore/JavaScriptCore.h>
@@ -273,7 +269,7 @@ template<>
 inline std::string Hyperloop::NativeObject<void *>::toString(JSContextRef ctx, JSValueRef* exception)
 {
     char buf[sizeof(void*)];
-#ifdef __WINDOWS__
+#ifdef _WIN32
     sprintf_s(buf,"%p",this->object);
 #else
     sprintf(buf,"%p",this->object);
