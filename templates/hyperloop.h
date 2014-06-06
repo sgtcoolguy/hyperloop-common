@@ -245,6 +245,58 @@ public:
 private:
     JSObjectRef object;
 };
+
+// int specialization
+template<>
+class NativeObject<int> : public AbstractObject 
+{
+public:
+    
+    NativeObject(int object)
+        : object{object}, AbstractObject{nullptr} 
+    {
+    }
+    
+    ~NativeObject() 
+    {
+    }
+
+    int getObject()
+    {
+        return object;
+    }
+    
+    void release() {}
+    void retain() {}
+    
+    std::string toString(JSContextRef ctx, JSValueRef* exception)
+    {
+        char buf[sizeof(void*)];
+#ifdef _WIN32
+        sprintf_s(buf,"%d",this->object);
+#else
+        sprintf(buf,"%d",this->object);
+#endif
+        return std::string(buf);
+    }
+
+    double toNumber(JSContextRef ctx, JSValueRef* exception)
+    {
+        return this->object;
+    }
+
+    bool toBoolean(JSContextRef ctx, JSValueRef* exception)
+    {
+        return false;
+    }
+    
+    bool hasInstance(JSContextRef ctx, JSValueRef other, JSValueRef* exception) {
+        return this->object == (int)JSValueToNumber(ctx, other, exception);
+    }
+    
+private:
+    int object;
+};
     
 /// void * specialization
 
@@ -289,50 +341,6 @@ inline bool Hyperloop::NativeObject<void *>::toBoolean(JSContextRef ctx, JSValue
     return false;
 }
 
-/// int specialization
-
-template<>
-inline void Hyperloop::NativeObject<int>::release()
-{
-}
-
-template<>
-inline void Hyperloop::NativeObject<int>::retain()
-{
-}
-
-template<>
-inline bool Hyperloop::NativeObject<int>::hasInstance(JSContextRef ctx, JSValueRef other, JSValueRef* exception)
-{
-    return this->object == (int)JSValueToNumber(ctx, other, exception);
-}
-
-template<>
-inline std::string Hyperloop::NativeObject<int>::toString(JSContextRef ctx, JSValueRef* exception)
-{
-    char buf[sizeof(void*)];
-#ifdef _WIN32
-    sprintf_s(buf,"%d",this->object);
-#else
-    sprintf(buf,"%d",this->object);
-#endif
-    return std::string(buf);
-}
-
-template<>
-inline double Hyperloop::NativeObject<int>::toNumber(JSContextRef ctx, JSValueRef* exception)
-{
-    return this->object;
-}
-
-template<>
-inline bool Hyperloop::NativeObject<int>::toBoolean(JSContextRef ctx, JSValueRef* exception)
-{
-    return false;
-}
-
-
 } // namespace
-
 
 #endif
