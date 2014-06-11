@@ -372,12 +372,12 @@ describe('#types', function(){
 		cleanup.should.be.empty;
 		declare.should.not.be.empty;
 		type.framework.should.be.equal('CoreGraphics');
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('JSValueTo_CGRect(ctx,value,exception)');
-		preamble.should.be.empty;
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('valuebuf2->getObject()');
+		preamble.should.not.be.empty;
+		preamble[0].should.be.equal('auto valuebuf = static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
 		cleanup.should.be.empty;
 		declare.should.not.be.empty;
-		declare[0].should.equal('JSValueRef CGRect_ToJSValue(JSContextRef,CGRect,JSValueRef *);');
-		declare[1].should.equal('EXPORTAPI CGRect JSValueTo_CGRect(JSContextRef,JSValueRef,JSValueRef *);');
+		declare[0].should.equal('JSValueRef CGRect_ToJSValue(JSContextRef,CGRect *,JSValueRef *);');
 	});
 
 	it('SEL', function () {
@@ -694,7 +694,7 @@ describe('#types', function(){
 		preamble.should.be.empty;
 		cleanup.should.be.empty;
 		declare.should.not.be.empty;
-		declare[0].should.equal('JSValueRef _opaque_pthread_attr_t_ToJSValue(JSContextRef,_opaque_pthread_attr_t,JSValueRef *);');
+		declare[0].should.equal('JSValueRef _opaque_pthread_attr_t_ToJSValue(JSContextRef,_opaque_pthread_attr_t *,JSValueRef *);');
 		var fields = type.toFields();
 		fields.should.have.length(2);
 		fields[0].should.have.property('name','__sig');
@@ -707,11 +707,11 @@ describe('#types', function(){
 		fields[1].type.isJSString().should.be.true;
 		fields[1].type.getCharArrayLength().should.equal(36);
 		declare = [];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('JSValueTo__opaque_pthread_attr_t(ctx,value,exception)');
-		preamble.should.be.empty;
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('valuebuf2->getObject()');
+		preamble.should.not.be.empty;
+		preamble[0].should.be.equal('auto valuebuf = static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
 		cleanup.should.be.empty;
-		declare.should.not.be.empty;
-		declare[0].should.be.equal('EXPORTAPI _opaque_pthread_attr_t JSValueTo__opaque_pthread_attr_t(JSContextRef,JSValueRef,JSValueRef *);');
+		declare.should.be.empty;
 	});
 
 	it('SFNTLookupFormatSpecificHeader', function(){
@@ -815,7 +815,7 @@ describe('#types', function(){
 		var type = typelib.resolveType('CGAffineTransform');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
-		type.toString().should.be.equal('CGAffineTransform');
+		type.toString().should.be.equal('CGAffineTransform *');
 		type.toName().should.be.equal('CGAffineTransform');
 	});
 
@@ -859,7 +859,7 @@ describe('#types', function(){
 		var type = typelib.resolveType('MKTileOverlayPath');
 		type.isJSObject().should.be.true;
 		type.isNativeStruct().should.be.true;
-		type.toString().should.be.equal('MKTileOverlayPath');
+		type.toString().should.be.equal('MKTileOverlayPath *');
 		type.toName().should.be.equal('MKTileOverlayPath');
 	});
 
