@@ -359,7 +359,7 @@ describe('lib/util.js', function() {
 			util.sanitizeSymbolName('Foo[]').should.equal('FooArray');
 		});
 		it ('should replace <>', function(){ 
-			util.sanitizeSymbolName('Foo<O>').should.equal('Foo$O$');
+			util.sanitizeSymbolName('Foo<O>').should.equal('Foo_O_');
 		});
 		it ('should replace `1', function(){ 
 			util.sanitizeSymbolName('Foo`1').should.equal('Foo');
