@@ -38,7 +38,8 @@ describe("IR", function(){
 		arg.value.should.be.equal('1');
 		arg.type.should.be.equal('string');
 		var code = arg.toNative().split('\n');
-		code[0].should.be.equal('auto var0 = JSStringCreateWithUTF8CString(\"1\");');
+		code[1].should.be.equal('const char var1[] = { 49,0 };');
+		code[2].should.be.equal('auto var0 = JSStringCreateWithUTF8CString(var1);');
 	});
 
 	it("should be able to create a value argument as boolean", function(){
@@ -104,10 +105,10 @@ describe("IR", function(){
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[1].should.be.equal('auto var1 = JSStringCreateWithUTF8CString("value");');
-		code[2].should.be.equal('auto CONST = JSValueMakeString(ctx,var1);');
-		code[4].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("CONST");');
-		code[5].should.be.equal('JSObjectSetProperty(ctx,object,var0,CONST,0,exception);');
+		code[2].should.be.equal('const char var2[] = { 118,97,108,117,101,0 };');
+		code[3].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var2);');
+		code[4].should.be.equal('auto CONST = JSValueMakeString(ctx,var1);');
+		code[6].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("CONST");');
 	});
 
 	it("should be able to parse variable", function(){
@@ -125,10 +126,10 @@ describe("IR", function(){
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[1].should.be.equal('auto var1 = JSStringCreateWithUTF8CString("value");');
-		code[2].should.be.equal('auto v1 = JSValueMakeString(ctx,var1);');
-		code[4].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("v1");');
-		code[5].should.be.equal('JSObjectSetProperty(ctx,object,var0,v1,0,exception);');
+		code[2].should.be.equal('const char var2[] = { 118,97,108,117,101,0 };');
+		code[4].should.be.equal('auto v1 = JSValueMakeString(ctx,var1);');
+		code[6].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("v1");');
+		code[7].should.be.equal('JSObjectSetProperty(ctx,object,var0,v1,0,exception);');
 	});
 
 	it("should be able to parse JS function", function(){
@@ -144,9 +145,10 @@ describe("IR", function(){
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[1].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("function doSomeFunc(){};doSomeFunc()");');
-		code[2].should.be.equal('auto var1 = JSStringCreateWithUTF8CString("app.js");');
-		code[3].should.be.equal('JSEvaluateScript(ctx,var0,object,var1,1,exception);');
+		code[2].should.be.equal('const char var0[] = { 102,117,110,99,116,105,111,110,32,100,111,83,111,109,101,70,117,110,99,40,41,123,125,59,100,111,83,111,109,101');
+		code[3].should.be.equal('    ,70,117,110,99,40,41,0 };');
+		code[4].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[6].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,1,exception);');
 	});
 
 	it("should be able to parse builtin function", function(){
@@ -162,9 +164,9 @@ describe("IR", function(){
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[1].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("abs()");');
-		code[2].should.be.equal('auto var1 = JSStringCreateWithUTF8CString("app.js");');
-		code[3].should.be.equal('JSEvaluateScript(ctx,var0,object,var1,1,exception);');
+		code[2].should.be.equal('const char var0[] = { 97,98,115,40,41,0 };');
+		code[3].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[5].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,1,exception);');
 	});
 
 	it("should be able to parse JS object", function(){
@@ -179,9 +181,9 @@ describe("IR", function(){
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[1].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("obj={get frame(){return frame},get window(){return window}}");');
-		code[2].should.be.equal('auto var1 = JSStringCreateWithUTF8CString("app.js");');
-		code[3].should.be.equal('JSEvaluateScript(ctx,var0,object,var1,1,exception);');
+		code[2].should.be.equal('const char var0[] = { 111,98,106,61,123,103,101,116,32,102,114,97,109,101,40,41,123,114,101,116,117,114,110,32,102,114,97,109,101,125');
+		code[4].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[6].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,1,exception);');
 	});
 
 	it("should be able to parse native function", function(){
@@ -313,9 +315,9 @@ describe("IR", function(){
 		node.type.should.be.equal('code');
 		node.code.should.be.equal('CGPoint_Set_x(point,CGPoint_Get_x(point)+11)');
 		var code = node.toNative().split('\n');
-		code[1].should.be.equal('auto var0 = JSStringCreateWithUTF8CString(\"CGPoint_Set_x(point,CGPoint_Get_x(point)+11)\");');
-		code[2].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(\"app.js\");');
-		code[3].should.be.equal('JSEvaluateScript(ctx,var0,object,var1,2,exception);');
+		code[2].should.be.equal('const char var0[] = { 67,71,80,111,105,110,116,95,83,101,116,95,120,40,112,111,105,110,116,44,67,71,80,111,105,110,116,95,71,101');
+		code[4].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[6].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,2,exception);');
 	});
 
 	it("should be able to parse nested native function", function(){
