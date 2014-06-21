@@ -141,14 +141,20 @@ describe("IR", function(){
 		ir.count.should.be.equal(1);
 		should.exist(ir.nodes[0].toNative);
 		ir.nodes[0].type.should.be.equal('code');
-		ir.nodes[0].code.should.be.equal('(function doSomeFunc(){});doSomeFunc()');
+		ir.nodes[0].code.should.be.equal('var doSomeFunc=(function doSomeFunc(){});doSomeFunc;doSomeFunc()');
 		ir.nodes[0].line.should.be.equal(1);
 		ir.nodes[0].filename.should.be.equal('app.js');
 		var code = ir.nodes[0].toNative().split('\n');
-		code[2].should.be.equal('const char var0[] = { 40,102,117,110,99,116,105,111,110,32,100,111,83,111,109,101,70,117,110,99,40,41,123,125,41,59,100,111,83,111');
-		code[3].should.be.equal('    ,109,101,70,117,110,99,40,41,0 };');
-		code[4].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
-		code[6].should.be.equal('auto doSomeFunc = JSEvaluateScript(ctx,var1,object,var2,1,exception);');
+		should(code).have.length(12);
+		code[2].should.be.equal('const char var0[] = { 118,97,114,32,100,111,83,111,109,101,70,117,110,99,61,40,102,117,110,99,116,105,111,110,32,100,111,83,111,109');
+		code[3].should.be.equal('    ,101,70,117,110,99,40,41,123,125,41,59,100,111,83,111,109,101,70,117,110,99,59,100,111,83,111,109,101,70,117');
+		code[4].should.be.equal('    ,110,99,40,41,0 };');
+		code[5].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[6].should.be.equal('auto var2 = JSStringCreateWithUTF8CString("app.js");');
+		code[7].should.be.equal('auto doSomeFunc = JSEvaluateScript(ctx,var1,object,var2,1,exception);');
+		code[8].should.be.equal('JSStringRelease(var1);');
+		code[9].should.be.equal('JSStringRelease(var2);');
+		code[10].should.be.equal('CHECK_EXCEPTION(exception);');
 	});
 
 	it("should be able to parse builtin function", function(){
