@@ -441,4 +441,19 @@ describe('lib/util.js', function() {
 		});
 	});
 
+	describe("#rpad", function(){
+		it('should not pad', function(){
+			util.rpad(1,'f').should.equal('f');
+		});
+		it('should pad', function(){
+			util.rpad(2,'f').should.equal('f ');
+		});
+		it('should pad with char', function(){
+			util.rpad(2,'f','x').should.equal('fx');
+		});
+		it('should be able to append pad',function(){
+			util.rpad(8-4,'','0').should.equal('0000');
+		});
+	});
+
 });

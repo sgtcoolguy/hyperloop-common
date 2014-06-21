@@ -1296,5 +1296,6 @@ describe('#types', function(){
 		type.toName().should.equal('const float64 *');
 		type.isPointer().should.be.true;
 	});
+
 });
 
