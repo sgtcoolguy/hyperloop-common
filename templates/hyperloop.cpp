@@ -328,9 +328,9 @@ EXPORTAPI JSObjectRef HyperloopVoidPointerToJSValue(JSContextRef ctx, void *poin
  */
 EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value, JSValueRef *exception)
 {
-    auto object = JSValueToObject(ctx,value,exception);
-    auto po = reinterpret_cast<Hyperloop::NativeObject<void *> *>(object);
-    return po->getObject();
+    auto po1 = static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));
+    auto po2 = static_cast<Hyperloop::NativeObject<void *> *>(po1);
+    return po2->getObject();
 }
 
 /**
@@ -380,3 +380,83 @@ EXPORTAPI bool HyperloopJSValueIsArray(JSContextRef ctx, JSValueRef value)
     }
     return false;
 }
+
+#define MEMORY_SIZE_OF_FUNCTION_DEF(type) \
+EXPORTAPI JSValueRef Hyperloop_Memory_Get_SizeOf_##type (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception)\
+{\
+    return JSValueMakeNumber(ctx,sizeof(type));\
+}
+
+MEMORY_SIZE_OF_FUNCTION_DEF(float)
+MEMORY_SIZE_OF_FUNCTION_DEF(int)
+MEMORY_SIZE_OF_FUNCTION_DEF(char)
+MEMORY_SIZE_OF_FUNCTION_DEF(bool)
+MEMORY_SIZE_OF_FUNCTION_DEF(double)
+MEMORY_SIZE_OF_FUNCTION_DEF(long)
+MEMORY_SIZE_OF_FUNCTION_DEF(short)
+
+#define MEMORY_GET_FUNCTION_DEF(type) \
+EXPORTAPI JSValueRef Hyperloop_Memory_Get_##type (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
+{\
+    if (argumentCount < 2 || !JSValueIsObject(ctx, arguments[0]) || !JSValueIsNumber(ctx, arguments[1])) {\
+        *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
+        return JSValueMakeUndefined(ctx);\
+    }\
+    auto pointer = static_cast<type*>(HyperloopJSValueToVoidPointer(ctx, arguments[0], exception));\
+    if (pointer == nullptr) {\
+        *exception = HyperloopMakeException(ctx, "Can't convert memory");\
+        return JSValueMakeUndefined(ctx);\
+    }\
+    auto index = static_cast<size_t>(JSValueToNumber(ctx, arguments[1], exception));\
+    auto size = sizeof(type);\
+    return JSValueMakeNumber(ctx, static_cast<double>(pointer[index]));\
+}
+
+MEMORY_GET_FUNCTION_DEF(float)
+MEMORY_GET_FUNCTION_DEF(int)
+MEMORY_GET_FUNCTION_DEF(char)
+MEMORY_GET_FUNCTION_DEF(bool)
+MEMORY_GET_FUNCTION_DEF(double)
+MEMORY_GET_FUNCTION_DEF(long)
+MEMORY_GET_FUNCTION_DEF(short)
+
+#define MEMORY_SET_FUNCTION_DEF(type) \
+EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
+{\
+    if (argumentCount < 3 || !JSValueIsObject(ctx, arguments[0]) || !JSValueIsNumber(ctx, arguments[1])) {\
+        *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
+        return JSValueMakeUndefined(ctx);\
+    }\
+    auto pointer = static_cast<type*>(HyperloopJSValueToVoidPointer(ctx, arguments[0], exception));\
+    auto index = static_cast<size_t>(JSValueToNumber(ctx, arguments[1], exception));\
+    auto size = sizeof(type);\
+    if (JSValueIsNumber(ctx, arguments[2])) {\
+        auto value = static_cast<type>(JSValueToNumber(ctx, arguments[2], exception));\
+        pointer[index] = value;\
+    } else if (HyperloopJSValueIsArray(ctx, arguments[2])) {\
+        auto jobj = JSValueToObject(ctx, arguments[2], exception);\
+        auto jstr = JSStringCreateWithUTF8CString("length");\
+        auto jlen = JSObjectGetProperty(ctx, jobj, jstr, exception);\
+        JSStringRelease(jstr);\
+        if (JSValueIsNumber(ctx, jlen)) {\
+            auto len = static_cast<size_t>(JSValueToNumber(ctx, jlen, exception));\
+            for (auto i = 0; i < len; i++) {\
+                auto jvalue = JSObjectGetPropertyAtIndex(ctx, jobj, i, exception);\
+                auto value = static_cast<type>(JSValueToNumber(ctx, jvalue, exception));\
+                pointer[index+i] = value;\
+            }\
+        }\
+    } else {\
+        *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
+        return JSValueMakeUndefined(ctx);\
+    }\
+    return JSValueMakeNull(ctx);\
+}
+
+MEMORY_SET_FUNCTION_DEF(float)
+MEMORY_SET_FUNCTION_DEF(int)
+MEMORY_SET_FUNCTION_DEF(char)
+MEMORY_SET_FUNCTION_DEF(bool)
+MEMORY_SET_FUNCTION_DEF(double)
+MEMORY_SET_FUNCTION_DEF(long)
+MEMORY_SET_FUNCTION_DEF(short)
