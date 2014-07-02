@@ -23,7 +23,7 @@
 
 #include <string> //TODO: refactor to remove c++ from API
 #include <cmath>
-
+#include <stdlib.h> 
 
 #define EXPORTAPI extern "C"
 
@@ -194,7 +194,12 @@ class NativeObject : public AbstractObject
 {
 public:
     NativeObject(T &t)
-        : object(t), AbstractObject{nullptr} 
+        : object(t), AbstractObject{nullptr}, owning{false}
+    {
+    }
+
+    NativeObject(T &t, bool own)
+        : object(t), AbstractObject{nullptr}, owning{own}
     {
     }
 
@@ -217,6 +222,7 @@ public:
     
 private:
     T object;
+    bool owning;
 };
 
 /// JSObjectRef (as function callback) specialization
@@ -303,6 +309,9 @@ private:
 template<>
 inline void Hyperloop::NativeObject<void *>::release()
 {
+    if (this->owning) {
+        free(this->object);
+    }
     delete this;
 }
 
