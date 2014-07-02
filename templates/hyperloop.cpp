@@ -440,7 +440,7 @@ EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef 
         JSStringRelease(jstr);\
         if (JSValueIsNumber(ctx, jlen)) {\
             auto len = static_cast<size_t>(JSValueToNumber(ctx, jlen, exception));\
-            for (auto i = 0; i < len; i++) {\
+            for (size_t i = 0; i < len; i++) {\
                 auto jvalue = JSObjectGetPropertyAtIndex(ctx, jobj, i, exception);\
                 auto value = static_cast<type>(JSValueToNumber(ctx, jvalue, exception));\
                 pointer[index+i] = value;\
