@@ -433,6 +433,15 @@ EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef 
     if (JSValueIsNumber(ctx, arguments[2])) {\
         auto value = static_cast<type>(JSValueToNumber(ctx, arguments[2], exception));\
         pointer[index] = value;\
+    } else if (JSValueIsString(ctx, arguments[2])) {\
+        auto str = JSValueToStringCopy(ctx,arguments[2],exception);\
+        auto size = JSStringGetMaximumUTF8CStringSize(str);\
+        auto buf = new char[size];\
+        JSStringGetUTF8CString(str,buf,size);\
+        JSStringRelease(str);\
+        pointer+=index;\
+        memcpy(pointer, buf, size);\
+        delete[] buf;\
     } else if (HyperloopJSValueIsArray(ctx, arguments[2])) {\
         auto jobj = JSValueToObject(ctx, arguments[2], exception);\
         auto jstr = JSStringCreateWithUTF8CString("length");\
