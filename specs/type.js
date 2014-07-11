@@ -768,17 +768,19 @@ describe('#types', function(){
 		type.isNativeUnion().should.be.true;
 		type.isJSObject().should.be.true;
 		var preamble = [], cleanup = [], declare = [];
-		type.toJSBody('value',preamble,cleanup,declare).should.be.equal('SFNTLookupFormatSpecificHeader_ToJSValue(ctx,value,exception)');
-		preamble.should.be.empty;
+		type.toJSBody('value',preamble,cleanup,declare).should.be.equal('SFNTLookupFormatSpecificHeader_ToJSValue(ctx,value$,exception)');
+		preamble.should.not.be.empty;
+		preamble[0] = 'SFNTLookupFormatSpecificHeader * value$ = (SFNTLookupFormatSpecificHeader *)malloc(sizeof(SFNTLookupFormatSpecificHeader));'
+		preamble[1] = 'memcpy(value$,&value,sizeof(SFNTLookupFormatSpecificHeader));';
 		cleanup.should.be.empty;
 		declare.should.not.be.empty;
-		declare[0].should.equal('JSValueRef SFNTLookupFormatSpecificHeader_ToJSValue(JSContextRef,SFNTLookupFormatSpecificHeader,JSValueRef *);');
+		declare[0].should.equal('JSValueRef SFNTLookupFormatSpecificHeader_ToJSValue(JSContextRef,SFNTLookupFormatSpecificHeader *,JSValueRef *);');
 		declare = [];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('JSValueTo_SFNTLookupFormatSpecificHeader(ctx,value,exception)');
-		preamble.should.be.empty;
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		preamble.should.not.be.empty;
+		preamble[8].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
 		cleanup.should.be.empty;
-		declare.should.not.be.empty;
-		declare[0].should.be.equal('EXPORTAPI SFNTLookupFormatSpecificHeader JSValueTo_SFNTLookupFormatSpecificHeader(JSContextRef,JSValueRef,JSValueRef *);');
+		declare.should.be.empty;
 	});
 
 	it('CGAffineTransform', function(){
@@ -1194,7 +1196,7 @@ describe('#types', function(){
 		};
 		typelib.metabase = metabase;
 		var type = typelib.resolveType('union _GLKMatrix4');
-		type.toString().should.equal('union _GLKMatrix4');
+		type.toName().should.equal('_GLKMatrix4');
 		type.isNativeUnion().should.be.true;
 		type = typelib.resolveType('GLKMatrix4');
 		type.isNativeUnion().should.be.true;
