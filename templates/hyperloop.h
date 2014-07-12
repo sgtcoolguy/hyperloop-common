@@ -272,7 +272,7 @@ public:
         return object;
     }
     
-    void release() {}
+    void release() {delete this;}
     void retain() {}
     
     std::string toString(JSContextRef ctx, JSValueRef* exception)
@@ -309,7 +309,7 @@ private:
 template<>
 inline void Hyperloop::NativeObject<void *>::release()
 {
-    if (this->owning) {
+    if (this->owning && this->object != nullptr) {
         free(this->object);
     }
     delete this;
