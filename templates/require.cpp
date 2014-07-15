@@ -678,14 +678,11 @@ namespace Appcelerator
 
 typedef std::vector<Appcelerator::TranslationUnit> TranslationUnitList;
 static TranslationUnitList translationUnits;
-static HyperloopJSValueRefCallback valueRefCallback;
-static HyperloopJSValueRemoveCallback removeRefCallback;
-static HyperloopJSValueSetCallback setRefCallback;
 
 /**
  * called by a translation unit to register its compiled code and it's pointer to JSValueRef mapping
  */
-EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopJSValueRefCallback valueCallback, HyperloopJSValueSetCallback setCallback, HyperloopJSValueRemoveCallback remCallback, HyperloopTranslationUnitCallback callback, size_t count, ...)
+EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopTranslationUnitCallback callback, size_t count, ...)
 {
     std::set<std::string> map;
     va_list vl;
@@ -697,35 +694,8 @@ EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopJSValueRefCallback valu
     }
     va_end(vl);
     translationUnits.push_back(Appcelerator::TranslationUnit(callback,map));
-    valueRefCallback = valueCallback;
-    removeRefCallback = remCallback;
-    setRefCallback = setCallback;
     return true;
 }
-/**
- * called to set JSValueRef for a given pointer
- */
-EXPORTAPI void HyperloopPointerSetJSValueRef(void *pointer, JSValueRef value)
-{
-    setRefCallback(pointer,value);
-}
-
-/**
- * called to attempt to return a JSValueRef for a given pointer
- */
-EXPORTAPI JSValueRef HyperloopPointerToJSValueRef(void *pointer)
-{
-    return valueRefCallback(pointer);
-}
-
-/**
- * called to remove a pointer to JSValueRef mapping
- */
-EXPORTAPI void HyperloopRemovePointerJSValueRef(void *pointer)
-{
-    removeRefCallback(pointer);
-}
-
 
 static TranslationUnitList::const_iterator findTranslationUnit (const char *filepath) 
 {
