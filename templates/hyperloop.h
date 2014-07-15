@@ -129,6 +129,11 @@ EXPORTAPI JSValueRef Hyperloop_Binary_IsEqual(JSContextRef ctx, JSObjectRef func
  */
 EXPORTAPI JSValueRef Hyperloop_Binary_IsStrictEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception);
 
+/*
+ * Tests whether a JavaScript value is an object constructed by given object, as compared by JS 'instanceof' operator
+ */
+EXPORTAPI JSValueRef Hyperloop_Binary_InstanceOf(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception);
+
 typedef JSValueRef (*HyperloopTranslationUnitCallback)(JSGlobalContextRef ctx, const JSObjectRef & parent, const char *path, JSValueRef *exception);
 
 /**
