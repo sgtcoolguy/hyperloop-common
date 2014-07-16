@@ -23,6 +23,30 @@
 static JSGlobalContextRef globalContextRef = nullptr;
 static JSContextGroupRef globalContextGroupRef = nullptr;
 
+typedef Hyperloop::NativeObject<void *> * NativeVoid;
+
+/**
+ * internal method to return NativeObject
+ */
+static NativeVoid ToNative(JSObjectRef object)
+{
+    auto p = JSObjectGetPrivate(object);
+    return reinterpret_cast<NativeVoid>(p);
+}
+
+/**
+ * internal method to return object
+ */
+static void * ToNativeObject(JSObjectRef object)
+{
+    auto o = ToNative(object);
+    if (o == nullptr)
+    {
+        return nullptr;
+    }
+    return reinterpret_cast<void *>(o->getObject());
+}
+
 /**
  * internal
  *
@@ -30,8 +54,8 @@ static JSContextGroupRef globalContextGroupRef = nullptr;
  */
 static void Initializer(JSContextRef context, JSObjectRef object)
 {
-    void *pointer = JSObjectGetPrivate(object);
-    HyperloopPointerSetJSValueRef(pointer,object);
+    auto n = ToNativeObject(object);
+    ToNative(object)->retain();
 }
 
 /**
@@ -41,9 +65,8 @@ static void Initializer(JSContextRef context, JSObjectRef object)
  */
 static void Finalizer(JSObjectRef object)
 {
-    auto po = reinterpret_cast<Hyperloop::NativeObject<void *> *>(object);
-    HyperloopRemovePointerJSValueRef(po->getObject());
-    po->release();
+    auto n = ToNativeObject(object);
+    ToNative(object)->release();
 }
 
 /**
@@ -315,11 +338,6 @@ EXPORTAPI JSObjectRef HyperloopVoidPointerToJSValue(JSContextRef ctx, void *poin
         def.className = "void *";
         ref = JSClassCreate(&def);
     }
-    auto v = HyperloopPointerToJSValueRef(pointer);
-    if (v!=nullptr)
-    {
-        return JSValueToObject(ctx,v,exception);
-    }
     return JSObjectMake(ctx, ref, new Hyperloop::NativeObject<void *>(pointer));
 }
 
@@ -338,12 +356,15 @@ EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value
 /**
  * invoke a function callback
  */
-EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
+EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (JSContextRef ctx, void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
-    //FIXME
-    return JSValueMakeUndefined(HyperloopGlobalContext());
-    //JSObjectRef callback = (JSObjectRef)HyperloopFunctionCallbackFunctionPointer(callbackPointer);
-    //return JSObjectCallAsFunction(HyperloopGlobalContext(), callback, NULL, argumentCount, arguments, exception);
+    JSValueRef callback = *(JSValueRef*)callbackPointer;
+    if (!JSValueIsObject(ctx, callback) || !JSObjectIsFunction(ctx, JSValueToObject(ctx,callback,exception))) {
+        *exception = HyperloopMakeException(ctx,"Function callback is not a JS function object");
+        return JSValueMakeUndefined(ctx);
+    }
+    JSObjectRef callbackObj = JSValueToObject(ctx,callback,exception);
+    return JSObjectCallAsFunction(HyperloopGlobalContext(), callbackObj, NULL, argumentCount, arguments, exception);
 }
 
 /*
@@ -397,8 +418,8 @@ MEMORY_SIZE_OF_FUNCTION_DEF(double)
 MEMORY_SIZE_OF_FUNCTION_DEF(long)
 MEMORY_SIZE_OF_FUNCTION_DEF(short)
 
-#define MEMORY_GET_FUNCTION_DEF(type) \
-EXPORTAPI JSValueRef Hyperloop_Memory_Get_##type (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
+#define MEMORY_GET_FUNCTION_DEF(name, type) \
+EXPORTAPI JSValueRef Hyperloop_Memory_Get_##name (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
 {\
     if (argumentCount < 2 || !JSValueIsObject(ctx, arguments[0]) || !JSValueIsNumber(ctx, arguments[1])) {\
         *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
@@ -414,16 +435,18 @@ EXPORTAPI JSValueRef Hyperloop_Memory_Get_##type (JSContextRef ctx, JSObjectRef 
     return JSValueMakeNumber(ctx, static_cast<double>(pointer[index]));\
 }
 
-MEMORY_GET_FUNCTION_DEF(float)
-MEMORY_GET_FUNCTION_DEF(int)
-MEMORY_GET_FUNCTION_DEF(char)
-MEMORY_GET_FUNCTION_DEF(bool)
-MEMORY_GET_FUNCTION_DEF(double)
-MEMORY_GET_FUNCTION_DEF(long)
-MEMORY_GET_FUNCTION_DEF(short)
+MEMORY_GET_FUNCTION_DEF(float, float)
+MEMORY_GET_FUNCTION_DEF(int, int)
+MEMORY_GET_FUNCTION_DEF(uint, unsigned int)
+MEMORY_GET_FUNCTION_DEF(char, char)
+MEMORY_GET_FUNCTION_DEF(bool, bool)
+MEMORY_GET_FUNCTION_DEF(double, double)
+MEMORY_GET_FUNCTION_DEF(long, long)
+MEMORY_GET_FUNCTION_DEF(short, short)
+MEMORY_GET_FUNCTION_DEF(ushort, unsigned short)
 
-#define MEMORY_SET_FUNCTION_DEF(type) \
-EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
+#define MEMORY_SET_FUNCTION_DEF(name, type) \
+EXPORTAPI JSValueRef Hyperloop_Memory_Set_##name (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)\
 {\
     if (argumentCount < 3 || !JSValueIsObject(ctx, arguments[0]) || !JSValueIsNumber(ctx, arguments[1])) {\
         *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
@@ -457,6 +480,13 @@ EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef 
                 pointer[index+i] = value;\
             }\
         }\
+    } else if (JSValueIsObject(ctx, arguments[2])) {\
+        auto otherPointer = HyperloopJSValueToVoidPointer(ctx, arguments[2], exception);\
+        if (otherPointer == nullptr) {\
+            *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
+            return JSValueMakeUndefined(ctx);\
+        }\
+        pointer[index] = reinterpret_cast<size_t>(otherPointer);\
     } else {\
         *exception = HyperloopMakeException(ctx, "Wrong arguments passed to memory");\
         return JSValueMakeUndefined(ctx);\
@@ -464,10 +494,71 @@ EXPORTAPI JSValueRef Hyperloop_Memory_Set_##type (JSContextRef ctx, JSObjectRef 
     return JSValueMakeNull(ctx);\
 }
 
-MEMORY_SET_FUNCTION_DEF(float)
-MEMORY_SET_FUNCTION_DEF(int)
-MEMORY_SET_FUNCTION_DEF(char)
-MEMORY_SET_FUNCTION_DEF(bool)
-MEMORY_SET_FUNCTION_DEF(double)
-MEMORY_SET_FUNCTION_DEF(long)
-MEMORY_SET_FUNCTION_DEF(short)
+MEMORY_SET_FUNCTION_DEF(float, float)
+MEMORY_SET_FUNCTION_DEF(int, int)
+MEMORY_SET_FUNCTION_DEF(uint, unsigned int)
+MEMORY_SET_FUNCTION_DEF(char, char)
+MEMORY_SET_FUNCTION_DEF(bool, bool)
+MEMORY_SET_FUNCTION_DEF(double, double)
+MEMORY_SET_FUNCTION_DEF(long, long)
+MEMORY_SET_FUNCTION_DEF(short, short)
+MEMORY_SET_FUNCTION_DEF(ushort, unsigned short)
+
+EXPORTAPI JSValueRef Hyperloop_Binary_IsStrictEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
+    if (argumentCount < 2)
+    {
+        *exception = HyperloopMakeException(ctx, "Wrong arguments passed to IsEqual");
+        return JSValueMakeUndefined(ctx);
+    }
+
+    auto isObject_a = JSValueIsObject(ctx, arguments[0]);
+    auto isObject_b = JSValueIsObject(ctx, arguments[1]);
+
+    if (isObject_a && isObject_b)
+    {
+        auto obj_a = HyperloopJSValueToVoidPointer(ctx, arguments[0], exception);
+        auto obj_b = HyperloopJSValueToVoidPointer(ctx, arguments[1], exception);
+
+        // nullptr means both objects are not a native object
+        if (obj_a == nullptr && obj_b == nullptr) {
+            return JSValueMakeBoolean(ctx, JSValueIsEqual(ctx, arguments[0], arguments[1], exception));
+        }
+
+        return JSValueMakeBoolean(ctx, (obj_a == obj_b));
+    }
+    else if (!isObject_a && !isObject_b) {
+        return JSValueMakeBoolean(ctx, JSValueIsEqual(ctx, arguments[0], arguments[1], exception));
+    }
+
+    return JSValueMakeBoolean(ctx, false);
+}
+
+EXPORTAPI JSValueRef Hyperloop_Binary_IsEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
+    if (argumentCount < 2)
+    {
+        *exception = HyperloopMakeException(ctx, "Wrong arguments passed to IsEqual");
+        return JSValueMakeUndefined(ctx);
+    }
+
+    auto isObject_a = JSValueIsObject(ctx, arguments[0]);
+    auto isObject_b = JSValueIsObject(ctx, arguments[1]);
+
+    if (isObject_a && isObject_b)
+    {
+        auto obj_a = HyperloopJSValueToVoidPointer(ctx, arguments[0], exception);
+        auto obj_b = HyperloopJSValueToVoidPointer(ctx, arguments[1], exception);
+
+        // nullptr means both objects are not a native object
+        if (obj_a == nullptr && obj_b == nullptr) {
+            return JSValueMakeBoolean(ctx, JSValueIsStrictEqual(ctx, arguments[0], arguments[1]));
+        }
+
+        return JSValueMakeBoolean(ctx, (obj_a == obj_b));
+    }
+    else if (!isObject_a && !isObject_b) {
+        return JSValueMakeBoolean(ctx, JSValueIsStrictEqual(ctx, arguments[0], arguments[1]));
+    }
+
+    return JSValueMakeBoolean(ctx, false);
+}
+

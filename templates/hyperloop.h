@@ -95,7 +95,7 @@ EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value
 /**
  * invoke a function callback
  */
-EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (JSContextRef ctx, void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
 /**
  * create a module instance
@@ -119,30 +119,27 @@ EXPORTAPI JSValueRef HyperloopModuleRequire(JSGlobalContextRef ctx, JSValueRef *
  */
 EXPORTAPI bool HyperloopJSValueIsArray(JSContextRef ctx, JSValueRef value);
 
+/*
+ * Tests whether two JavaScript values are equals, as compared by the JS '==' operator
+ */
+EXPORTAPI JSValueRef Hyperloop_Binary_IsEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception);
+
+/*
+ * Tests whether two JavaScript values are equals, as compared by the JS '===' operator
+ */
+EXPORTAPI JSValueRef Hyperloop_Binary_IsStrictEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception);
+
+/*
+ * Tests whether a JavaScript value is an object constructed by given object, as compared by JS 'instanceof' operator
+ */
+EXPORTAPI JSValueRef Hyperloop_Binary_InstanceOf(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception);
+
 typedef JSValueRef (*HyperloopTranslationUnitCallback)(JSGlobalContextRef ctx, const JSObjectRef & parent, const char *path, JSValueRef *exception);
-typedef JSValueRef (*HyperloopJSValueRefCallback)(void *ptr);
-typedef void (*HyperloopJSValueRemoveCallback)(void *ptr);
-typedef void (*HyperloopJSValueSetCallback)(void *ptr, JSValueRef value);
 
 /**
  * called by a translation unit to register its compiled code
  */
-EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopJSValueRefCallback refCallback, HyperloopJSValueSetCallback setCallback, HyperloopJSValueRemoveCallback remCallback, HyperloopTranslationUnitCallback callback, size_t count, ...);
-
-/**
- * called to attempt to return a JSValueRef for a given pointer
- */
-EXPORTAPI JSValueRef HyperloopPointerToJSValueRef(void *pointer);
-
-/**
- * called to set JSValueRef for a given pointer
- */
-EXPORTAPI void HyperloopPointerSetJSValueRef(void *pointer, JSValueRef value);
-
-/**
- * called to remove a pointer to JSValueRef mapping
- */
-EXPORTAPI void HyperloopRemovePointerJSValueRef(void *pointer);
+EXPORTAPI bool HyperloopRegisterTranslationUnit(HyperloopTranslationUnitCallback callback, size_t count, ...);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Platforms implement
@@ -272,7 +269,7 @@ public:
         return object;
     }
     
-    void release() {}
+    void release() {delete this;}
     void retain() {}
     
     std::string toString(JSContextRef ctx, JSValueRef* exception)
@@ -309,7 +306,7 @@ private:
 template<>
 inline void Hyperloop::NativeObject<void *>::release()
 {
-    if (this->owning) {
+    if (this->owning && this->object != nullptr) {
         free(this->object);
     }
     delete this;
