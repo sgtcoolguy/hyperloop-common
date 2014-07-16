@@ -572,19 +572,30 @@ describe('#types', function(){
 		declare.should.be.empty;
 		preamble.should.be.empty;
 		cleanup.should.be.empty;
-		type.toNativeBody('value',preamble,cleanup).should.be.equal('nullptr');
-		declare.should.be.empty;
+		type.toNativeBody('value',preamble,cleanup,declare).should.be.equal('CFAllocatorCopyDescriptionCallBack_FunctionCallback');
+		declare.should.not.be.empty;
+		declare[0].should.be.equal('EXPORTAPI CFStringRef CFAllocatorCopyDescriptionCallBack_FunctionCallback(void *);');
 		preamble.should.be.empty;
 		cleanup.should.be.empty;
 		var content = [
+			'EXPORTAPI CFStringRef JSValueTo_CFStringRef(JSContextRef, JSValueRef, JSValueRef*);',
+			'',
 			'CFStringRef CFAllocatorCopyDescriptionCallBack_FunctionCallback(const void * arg0)',
 			'{',
 			'\tauto ctx = HyperloopGlobalContext();',
 			'\tJSValueRef *exception = nullptr;',
 			'\tauto argumentCount = 0;',
 			'\tJSValueRef arguments[] = {  };',
-			'\tauto fnCallbackResult = HyperloopInvokeFunctionCallback((void *)arg0,argumentCount,arguments,exception);',
-			'\tauto returnResult = JSValueTo_CFStringRef(ctx,fnCallbackResult,exception);',
+			'\tauto fnCallbackResult = HyperloopInvokeFunctionCallback(ctx, (JSValueRef *)arg0,argumentCount,arguments,exception);',
+			'\tauto is_fnCallbackResultnull = JSValueIsNull(ctx,fnCallbackResult) || (JSValueIsNumber(ctx,fnCallbackResult) && JSValueToNumber(ctx,fnCallbackResult,exception)==0);',
+			'\tif (is_fnCallbackResultnull)',
+			'\t{',
+			'\t\t*exception = HyperloopMakeException(ctx,"null is not allowed for fnCallbackResult");',
+			'\t\treturn JSValueMakeUndefined(ctx);',
+			'\t}',
+			'\tauto fnCallbackResultbuf = is_fnCallbackResultnull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,fnCallbackResult,exception)));',
+			'\tauto fnCallbackResultbuf2 = static_cast<Hyperloop::NativeObject<CFStringRef> *>(fnCallbackResultbuf);',
+			'\tauto returnResult = is_fnCallbackResultnull ? nullptr : fnCallbackResultbuf2->getObject();',
 			'\treturn returnResult;',
 			'}',
 			'',
@@ -600,7 +611,7 @@ describe('#types', function(){
 			'\t}',
 			'',
 			'\treturn JSValueMakeUndefined(ctx);',
-			'}',
+			'}'
 		];
 		type.toNativeFunctionCallback('CFAllocatorCopyDescriptionCallBack').should.be.equal(content.join('\n'));
 	});
