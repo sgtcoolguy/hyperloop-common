@@ -169,10 +169,10 @@ static void InitializeContext (JSGlobalContextRef ctx)
  * 
  * called to create the hyperloop VM
  */
+EXPORTAPI void HyperloopInitialize_Source();
 #ifdef USE_TIJSCORE
 static void InitializeHyperloopVM(JSGlobalContextRef ctx) 
 #else
-EXPORTAPI void HyperloopInitialize_Source();
 static void InitializeHyperloopVM() 
 #endif
 {
@@ -324,12 +324,14 @@ EXPORTAPI JSObjectRef HyperloopVoidPointerToJSValue(JSContextRef ctx, void *poin
 }
 
 /**
- * return a void pointer from a JSValueRef
+ * return a void pointer from a JSValueRef or NULL of not a navite object
  */
 EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value, JSValueRef *exception)
 {
     auto po1 = static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));
+    if(po1 == NULL) return NULL;
     auto po2 = static_cast<Hyperloop::NativeObject<void *> *>(po1);
+    if(po2 == NULL) return NULL;
     return po2->getObject();
 }
 
