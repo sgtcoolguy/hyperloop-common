@@ -383,4 +383,165 @@ describe("IR", function(){
 		code[7].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("window");');
 		code[8].should.be.equal('JSObjectSetProperty(ctx,object,var0,window,0,exception);');
 	});
+
+	it("should be able to parse var decl from native function with string arg", function(){
+		jsgen.resetVariableNames();
+		var ir = new IR(),
+			source = 'var selector = NSSelectorFromString("tapped:");',
+			ast = Uglify.parse(source);
+		ir.parse({options:{},
+			symbols:{
+				'NSSelectorFromString':{symbolname:'NSSelectorFromString'},
+			}}, 'app.js', 'app.js', 'app.js', 'app.js', source, ast);
+
+		ir.count.should.be.equal(1);
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].name.should.be.equal('selector');
+		ir.nodes[0].expression.type.should.be.equal('native');
+		ir.nodes[0].expression.metatype.should.be.equal('function');
+		ir.nodes[0].expression.name.should.be.equal('NSSelectorFromString');
+		ir.nodes[0].expression.symbolname.should.be.equal('NSSelectorFromString');
+		ir.nodes[0].expression.arguments.length.should.be.equal(1);
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+
+		var arg = ir.nodes[0].expression.arguments[0];
+		arg.should.be.an.object;
+		arg.metatype.should.be.equal('value');
+		arg.value.should.be.equal('tapped:');
+		arg.type.should.be.equal('string');
+		var code = ir.nodes[0].toNative().split('\n');
+		code[1].should.be.equal('JSValueRef var1[1];');
+		code[3].should.be.equal('const char var3[] = { 116,97,112,112,101,100,58,0 };');
+		code[4].should.be.equal('auto var2 = JSStringCreateWithUTF8CString(var3);');
+		code[5].should.be.equal('var1[0] = JSValueMakeString(ctx,var2);');
+		code[7].should.be.equal('auto selector = NSSelectorFromString(ctx,NSSelectorFromStringFn,NSSelectorFromStringFn,1,var1,exception);');
+		code[11].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("selector");');
+		code[12].should.be.equal('JSObjectSetProperty(ctx,object,var0,selector,0,exception);');
+	});
+
+	it("should be able to parse var decl from native function with string arg and pass var in as function call arg", function(){
+		jsgen.resetVariableNames();
+		var ir = new IR(),
+			source = 'var selector = NSString_stringWithUTF8String("tapped:");\nNSSelectorFromString(selector);',
+			ast = Uglify.parse(source);
+		ir.parse({options:{},
+			symbols:{
+				'NSSelectorFromString':{symbolname:'NSSelectorFromString'},
+				'NSString_stringWithUTF8String':{symbolname:'NSString_stringWithUTF8String'},
+			}}, 'app.js', 'app.js', 'app.js', 'app.js', source, ast);
+
+		ir.count.should.be.equal(2);
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].name.should.be.equal('selector');
+		ir.nodes[0].expression.type.should.be.equal('native');
+		ir.nodes[0].expression.metatype.should.be.equal('function');
+		ir.nodes[0].expression.name.should.be.equal('NSString_stringWithUTF8String');
+		ir.nodes[0].expression.symbolname.should.be.equal('NSString_stringWithUTF8String');
+		ir.nodes[0].expression.arguments.length.should.be.equal(1);
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+
+		var arg = ir.nodes[0].expression.arguments[0];
+		arg.should.be.an.object;
+		arg.metatype.should.be.equal('value');
+		arg.value.should.be.equal('tapped:');
+		arg.type.should.be.equal('string');
+		var code = ir.nodes[0].toNative().split('\n');
+		code[1].should.be.equal('JSValueRef var1[1];');
+		code[3].should.be.equal('const char var3[] = { 116,97,112,112,101,100,58,0 };');
+		code[4].should.be.equal('auto var2 = JSStringCreateWithUTF8CString(var3);');
+		code[5].should.be.equal('var1[0] = JSValueMakeString(ctx,var2);');
+		code[7].should.be.equal('auto selector = NSString_stringWithUTF8String(ctx,NSString_stringWithUTF8StringFn,NSString_stringWithUTF8StringFn,1,var1,exception);');
+		code[11].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("selector");');
+		code[12].should.be.equal('JSObjectSetProperty(ctx,object,var0,selector,0,exception);');
+	});
+
+	it("should be able to parse string that makes JS method call", function(){
+		jsgen.resetVariableNames();
+		var ir = new IR(),
+			source = '"tapped:".trim();',
+			ast = Uglify.parse(source);
+		ir.parse({options:{},
+			symbols:{}}, 'app.js', 'app.js', 'app.js', 'app.js', source, ast);
+
+		// treats it as a block of code to eval
+		ir.count.should.be.equal(1);
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].type.should.be.equal('code');
+		ir.nodes[0].code.should.be.equal('"tapped:".trim()');
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+		var code = ir.nodes[0].toNative().split('\n');
+		code[2].should.be.equal('const char var0[] = { 34,116,97,112,112,101,100,58,34,46,116,114,105,109,40,41,0 };');
+		code[3].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[5].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,1,exception);');
+		code[6].should.be.equal('JSStringRelease(var1);');
+		code[7].should.be.equal('JSStringRelease(var2);');
+	});
+
+	it("should be able to parse assignment with value needing to be eval'd", function(){
+		jsgen.resetVariableNames();
+		var ir = new IR(),
+			source = 'var str = "tapped:".trim();',
+			ast = Uglify.parse(source);
+		ir.parse({options:{},
+			symbols:{}}, 'app.js', 'app.js', 'app.js', 'app.js', source, ast);
+
+		ir.count.should.be.equal(2);
+
+		// First treat the value as eval
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].type.should.be.equal('code');
+		ir.nodes[0].code.should.be.equal('"tapped:".trim()');
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+		var code = ir.nodes[0].toNative().split('\n');
+		code[2].should.be.equal('const char var0[] = { 34,116,97,112,112,101,100,58,34,46,116,114,105,109,40,41,0 };');
+		code[3].should.be.equal('auto var1 = JSStringCreateWithUTF8CString(var0);');
+		code[5].should.be.equal('JSEvaluateScript(ctx,var1,object,var2,1,exception);');
+		code[6].should.be.equal('JSStringRelease(var1);');
+		code[7].should.be.equal('JSStringRelease(var2);');
+
+		// second assign the eval'd value to the variable!
+		ir.count.should.be.equal(1);
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].type.should.be.equal('variable');
+		ir.nodes[0].metatype.should.be.equal('string');
+		ir.nodes[0].name.should.be.equal('v1');
+		ir.nodes[0].value.should.be.equal('value');
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+		var code = ir.nodes[0].toNative().split('\n');
+		code[2].should.be.equal('const char var2[] = { 118,97,108,117,101,0 };');
+		code[4].should.be.equal('auto v1 = JSValueMakeString(ctx,var1);');
+		code[6].should.be.equal('auto var0 = JSStringCreateWithUTF8CString("v1");');
+		code[7].should.be.equal('JSObjectSetProperty(ctx,object,var0,v1,0,exception);');
+	});
+
+	it("should be able to parse var decl from native function with string arg that makes method call", function(){
+		jsgen.resetVariableNames();
+		var ir = new IR(),
+			source = 'var selector = NSSelectorFromString("tapped:".trim());',
+			ast = Uglify.parse(source);
+		ir.parse({options:{},
+			symbols:{
+				'NSSelectorFromString':{symbolname:'NSSelectorFromString'},
+			}}, 'app.js', 'app.js', 'app.js', 'app.js', source, ast);
+
+		ir.count.should.be.equal(1);
+		should.exist(ir.nodes[0].toNative);
+		ir.nodes[0].name.should.be.equal('selector');
+		ir.nodes[0].expression.type.should.be.equal('native');
+		ir.nodes[0].expression.metatype.should.be.equal('function');
+		ir.nodes[0].expression.name.should.be.equal('NSSelectorFromString');
+		ir.nodes[0].expression.symbolname.should.be.equal('NSSelectorFromString');
+		ir.nodes[0].expression.arguments.length.should.be.equal(1);
+		ir.nodes[0].line.should.be.equal(1);
+		ir.nodes[0].filename.should.be.equal('app.js');
+
+		var arg = ir.nodes[0].expression.arguments[0];
+		arg.should.be.an.object;
+		// FIXME what should it look like?
+	});
 });
