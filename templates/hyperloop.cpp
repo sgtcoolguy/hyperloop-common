@@ -357,12 +357,15 @@ EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value
 /**
  * invoke a function callback
  */
-EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
+EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (JSContextRef ctx, void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
-    //FIXME
-    return JSValueMakeUndefined(HyperloopGlobalContext());
-    //JSObjectRef callback = (JSObjectRef)HyperloopFunctionCallbackFunctionPointer(callbackPointer);
-    //return JSObjectCallAsFunction(HyperloopGlobalContext(), callback, NULL, argumentCount, arguments, exception);
+    JSValueRef callback = *(JSValueRef*)callbackPointer;
+    if (!JSValueIsObject(ctx, callback) || !JSObjectIsFunction(ctx, JSValueToObject(ctx,callback,exception))) {
+        *exception = HyperloopMakeException(ctx,"Function callback is not a JS function object");
+        return JSValueMakeUndefined(ctx);
+    }
+    JSObjectRef callbackObj = JSValueToObject(ctx,callback,exception);
+    return JSObjectCallAsFunction(HyperloopGlobalContext(), callbackObj, NULL, argumentCount, arguments, exception);
 }
 
 /*

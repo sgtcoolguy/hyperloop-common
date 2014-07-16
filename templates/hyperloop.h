@@ -95,7 +95,7 @@ EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value
 /**
  * invoke a function callback
  */
-EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+EXPORTAPI JSValueRef HyperloopInvokeFunctionCallback (JSContextRef ctx, void * callbackPointer, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
 /**
  * create a module instance
