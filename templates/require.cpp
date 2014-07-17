@@ -117,11 +117,9 @@ void Appcelerator::Module::addChild(const JSObjectRef & child)
     }
     else 
     {
-        auto prop = JSStringCreateWithUTF8CString("push");
-        auto value = JSObjectGetProperty(ctx,children,prop,0);
-        auto object = JSValueToObject(ctx,value,0);
-        JSObjectCallAsFunction(ctx,nullptr,children,1,elements,0);
-        JSStringRelease(prop);
+        JSPropertyNameArrayRef childrenRef = JSObjectCopyPropertyNames(ctx,children);
+        JSObjectSetPropertyAtIndex(ctx, children, JSPropertyNameArrayGetCount(childrenRef), child, NULL);
+        JSPropertyNameArrayRelease(childrenRef);
     }
 }
 

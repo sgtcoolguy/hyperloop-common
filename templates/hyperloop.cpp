@@ -347,9 +347,9 @@ EXPORTAPI JSObjectRef HyperloopVoidPointerToJSValue(JSContextRef ctx, void *poin
 EXPORTAPI void* HyperloopJSValueToVoidPointer(JSContextRef ctx, JSValueRef value, JSValueRef *exception)
 {
     auto po1 = static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));
-    if(po1 == NULL) return NULL;
+    if(po1 == nullptr) return nullptr;
     auto po2 = static_cast<Hyperloop::NativeObject<void *> *>(po1);
-    if(po2 == NULL) return NULL;
+    if(po2 == nullptr) return nullptr;
     return po2->getObject();
 }
 
