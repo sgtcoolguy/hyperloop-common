@@ -9,6 +9,11 @@
 #ifndef __HYPERLOOP_HEADER__
 #define __HYPERLOOP_HEADER__
 
+// C99 type
+#ifndef _Bool
+#define _Bool bool
+#endif
+
 #ifndef HYPERLOOP_EXCLUDE_JSCORE_IMPORT
 #ifdef HL_IOS
 #include <JavaScriptCore/JavaScriptCore.h>

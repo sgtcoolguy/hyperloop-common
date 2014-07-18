@@ -105,10 +105,10 @@ describe('#types', function(){
 		preamble.should.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
-		preamble[1].should.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[2].should.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<void *> *>(valuebuf);');
+		preamble[10].should.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[11].should.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<void *> *>(valuebuf);');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 	});
@@ -121,10 +121,10 @@ describe('#types', function(){
 		type.isConst().should.be.true;
 		type.toJSBody('value').should.equal('HyperloopVoidPointerToJSValue(ctx,const_cast<void *>(value),exception)');
 		var preamble = [], cleanup = [], declare = [];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
-		preamble[1].should.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[2].should.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<void *> *>(valuebuf);');
+		preamble[10].should.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[11].should.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<void *> *>(valuebuf);');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 	});
@@ -269,12 +269,12 @@ describe('#types', function(){
 		declare[0].should.equal('JSValueRef Foo_ToJSValue(JSContextRef,struct Foo *,JSValueRef *);');
 		declare=[];
 		preamble=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valueptr');
 		preamble.should.not.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
 	});
 
 	it('struct Foo *', function() {
@@ -290,12 +290,12 @@ describe('#types', function(){
 		declare.should.not.be.empty;
 		declare[0].should.equal('JSValueRef Foo_ToJSValue(JSContextRef,struct Foo *,JSValueRef *);');
 		declare=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
 	});
 
 	it('const struct Foo *', function() {
@@ -312,12 +312,12 @@ describe('#types', function(){
 		declare.should.not.be.empty;
 		declare[0].should.equal('JSValueRef constFoo_ToJSValue(JSContextRef,struct Foo *,JSValueRef *);');
 		declare=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<struct Foo *> *>(valuebuf);');
 	});
 
 	it('int32_t', function() {
@@ -379,10 +379,10 @@ describe('#types', function(){
 		type.framework.should.be.equal('CoreGraphics');
 		preamble = [];
 		declare = [];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valueptr');
 		preamble.should.not.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<CGRect *> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<CGRect *> *>(valuebuf);');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 	});
@@ -418,12 +418,12 @@ describe('#types', function(){
 		declare.should.not.be.empty;
 		declare[0].should.equal('JSValueRef SEL_ToJSValue(JSContextRef,SEL,JSValueRef *);')
 		declare=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<SEL> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<SEL> *>(valuebuf);');
 	});
 
 	it('CFNullRef', function() {
@@ -452,12 +452,12 @@ describe('#types', function(){
 		declare.should.not.be.empty;
 		declare[0].should.equal('JSValueRef CFNullRef_ToJSValue(JSContextRef,CFNullRef,JSValueRef *);');
 		declare=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('is_valuenull ? nullptr : valueptr');
 		preamble.should.not.be.empty;
 		cleanup.should.be.empty;
 		declare.should.be.empty;
-		preamble[6].should.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<CFNullRef> *>(valuebuf);');
+		preamble[15].should.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<CFNullRef> *>(valuebuf);');
 	});
 
 	it('__CFAllocator', function() {
@@ -496,12 +496,12 @@ describe('#types', function(){
 		declare[0].should.equal('JSValueRef __CFAllocator_ToJSValue(JSContextRef,struct __CFAllocator *,JSValueRef *);');
 		declare=[];
 		preamble=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valueptr');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 		preamble.should.not.be.empty;
-		preamble[6].should.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<struct __CFAllocator *> *>(valuebuf);');
+		preamble[15].should.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<struct __CFAllocator *> *>(valuebuf);');
 	});
 
 	it('CFStringRef', function(){
@@ -531,12 +531,12 @@ describe('#types', function(){
 		preamble.should.be.empty;
 		declare[0].should.equal('JSValueRef CFStringRef_ToJSValue(JSContextRef,CFStringRef,JSValueRef *);');
 		declare=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.be.equal('is_valuenull ? nullptr : valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.be.equal('is_valuenull ? nullptr : valueptr');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 		preamble.should.not.be.empty;
-		preamble[6].should.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<CFStringRef> *>(valuebuf);');
+		preamble[15].should.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<CFStringRef> *>(valuebuf);');
 	});
 
 	it('CFAllocatorCopyDescriptionCallBack', function(){
@@ -578,40 +578,51 @@ describe('#types', function(){
 		preamble.should.be.empty;
 		cleanup.should.be.empty;
 		var content = [
-			'EXPORTAPI CFStringRef JSValueTo_CFStringRef(JSContextRef, JSValueRef, JSValueRef*);',
-			'',
-			'CFStringRef CFAllocatorCopyDescriptionCallBack_FunctionCallback(const void * arg0)',
-			'{',
-			'\tauto ctx = HyperloopGlobalContext();',
-			'\tJSValueRef *exception = nullptr;',
-			'\tauto argumentCount = 0;',
-			'\tJSValueRef arguments[] = {  };',
-			'\tauto fnCallbackResult = HyperloopInvokeFunctionCallback(ctx, (JSValueRef *)arg0,argumentCount,arguments,exception);',
-			'\tauto is_fnCallbackResultnull = JSValueIsNull(ctx,fnCallbackResult) || (JSValueIsNumber(ctx,fnCallbackResult) && JSValueToNumber(ctx,fnCallbackResult,exception)==0);',
-			'\tif (is_fnCallbackResultnull)',
-			'\t{',
-			'\t\t*exception = HyperloopMakeException(ctx,"null is not allowed for fnCallbackResult");',
-			'\t\treturn JSValueMakeUndefined(ctx);',
-			'\t}',
-			'\tauto fnCallbackResultbuf = is_fnCallbackResultnull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,fnCallbackResult,exception)));',
-			'\tauto fnCallbackResultbuf2 = static_cast<Hyperloop::NativeObject<CFStringRef> *>(fnCallbackResultbuf);',
-			'\tauto returnResult = is_fnCallbackResultnull ? nullptr : fnCallbackResultbuf2->getObject();',
-			'\treturn returnResult;',
-			'}',
-			'',
-			'/**',
-			' * called to allow the construction of a native function callback',
-			' */',
-			'JSValueRef CFAllocatorCopyDescriptionCallBack_constructor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)',
-			'{',
-			'\tif (argumentCount==0 || !JSValueIsObject(ctx,arguments[0]) || !JSObjectIsFunction(ctx,JSValueToObject(ctx,arguments[0],exception)))',
-			'\t{',
-			'\t\t*exception = HyperloopMakeException(ctx,"first argument must be a function callback");',
-			'\t\treturn JSValueMakeUndefined(ctx);',
-			'\t}',
-			'',
-			'\treturn JSValueMakeUndefined(ctx);',
-			'}'
+		    "EXPORTAPI CFStringRef JSValueTo_CFStringRef(JSContextRef, JSValueRef, JSValueRef*);",
+		    "",
+		    "CFStringRef CFAllocatorCopyDescriptionCallBack_FunctionCallback(const void * arg0)",
+		    "{",
+		    "\tauto ctx = HyperloopGlobalContext();",
+		    "\tJSValueRef *exception = nullptr;",
+		    "\tauto argumentCount = 0;",
+		    "\tJSValueRef arguments[] = {  };",
+		    "\tauto fnCallbackResult = HyperloopInvokeFunctionCallback(ctx, (JSValueRef *)arg0,argumentCount,arguments,exception);",
+		    "\tauto is_fnCallbackResultnull = JSValueIsNull(ctx,fnCallbackResult);",
+		    "\tif (is_fnCallbackResultnull)",
+		    "\t{",
+		    "\t\t*exception = HyperloopMakeException(ctx,\"null is not allowed for fnCallbackResult\");",
+		    "\t\treturn JSValueMakeUndefined(ctx);",
+		    "\t}",
+		    "\tCFStringRef fnCallbackResultptr = nullptr;",
+		    "\tif (!is_fnCallbackResultnull && JSValueIsNumber(ctx,fnCallbackResult))",
+		    "\t{",
+		    "\t\t// pointer could be a number. we just cast it then",
+		    "\t\tauto fnCallbackResultnum = JSValueToNumber(ctx,fnCallbackResult,exception);",
+		    "\t\tfnCallbackResultptr = reinterpret_cast<CFStringRef>(static_cast<size_t>(fnCallbackResultnum));",
+		    "\t}",
+		    "\telse if (!is_fnCallbackResultnull)",
+		    "\t{",
+		    "\t\tauto fnCallbackResultbuf = is_fnCallbackResultnull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,fnCallbackResult,exception)));",
+		    "\t\tauto fnCallbackResultbuf2 = static_cast<Hyperloop::NativeObject<CFStringRef> *>(fnCallbackResultbuf);",
+		    "\t\tfnCallbackResultptr = fnCallbackResultbuf2->getObject();",
+		    "\t}",
+		    "\tauto returnResult = is_fnCallbackResultnull ? nullptr : fnCallbackResultptr;",
+		    "\treturn returnResult;",
+		    "}",
+		    "",
+		    "/**",
+		    " * called to allow the construction of a native function callback",
+		    " */",
+		    "JSValueRef CFAllocatorCopyDescriptionCallBack_constructor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)",
+		    "{",
+		    "\tif (argumentCount==0 || !JSValueIsObject(ctx,arguments[0]) || !JSObjectIsFunction(ctx,JSValueToObject(ctx,arguments[0],exception)))",
+		    "\t{",
+		    "\t\t*exception = HyperloopMakeException(ctx,\"first argument must be a function callback\");",
+		    "\t\treturn JSValueMakeUndefined(ctx);",
+		    "\t}",
+		    "",
+		    "\treturn JSValueMakeUndefined(ctx);",
+		    "}"
 		];
 		type.toNativeFunctionCallback('CFAllocatorCopyDescriptionCallBack').should.be.equal(content.join('\n'));
 	});
@@ -731,10 +742,10 @@ describe('#types', function(){
 		fields[1].type.getCharArrayLength().should.equal(36);
 		declare = [];
 		preamble=[];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valueptr');
 		preamble.should.not.be.empty;
-		preamble[6].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
-		preamble[7].should.be.equal('auto valuebuf2 = static_cast<Hyperloop::NativeObject<_opaque_pthread_attr_t *> *>(valuebuf);');
+		preamble[15].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[16].should.be.equal('\tauto valuebuf2 = static_cast<Hyperloop::NativeObject<_opaque_pthread_attr_t *> *>(valuebuf);');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 	});
@@ -787,9 +798,9 @@ describe('#types', function(){
 		declare.should.not.be.empty;
 		declare[0].should.equal('JSValueRef SFNTLookupFormatSpecificHeader_ToJSValue(JSContextRef,SFNTLookupFormatSpecificHeader *,JSValueRef *);');
 		declare = [];
-		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valuebuf2->getObject()');
+		type.toNativeBody('value',preamble,cleanup,declare).should.equal('*valueptr');
 		preamble.should.not.be.empty;
-		preamble[8].should.be.equal('auto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
+		preamble[17].should.be.equal('\tauto valuebuf = is_valuenull ? nullptr : static_cast<Hyperloop::AbstractObject*>(JSObjectGetPrivate(JSValueToObject(ctx,value,exception)));');
 		cleanup.should.be.empty;
 		declare.should.be.empty;
 	});
@@ -935,7 +946,7 @@ describe('#types', function(){
 		var type = typelib.resolveType('struct OpaqueMIDIDeviceList *');
 		type.isNativeStruct().should.be.true;
 		type.toString().should.be.equal('struct OpaqueMIDIDeviceList *');
-		type.toName().should.be.equal('struct OpaqueMIDIDeviceList *');
+		type.toName().should.be.equal('struct OpaqueMIDIDeviceList');
 	});
 
 	it('NSStringEncoding', function(){
@@ -1263,7 +1274,7 @@ describe('#types', function(){
 		typelib.metabase = metabase;
 		var type = typelib.resolveType('struct __CVBuffer *');
 		type.toString().should.equal('struct __CVBuffer *');
-		type.toName().should.equal('struct __CVBuffer *');
+		type.toName().should.equal('struct __CVBuffer');
 	});
 
 	it('CVImageBufferRef', function(){
