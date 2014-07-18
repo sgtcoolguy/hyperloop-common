@@ -504,6 +504,23 @@ MEMORY_SET_FUNCTION_DEF(long, long)
 MEMORY_SET_FUNCTION_DEF(short, short)
 MEMORY_SET_FUNCTION_DEF(ushort, unsigned short)
 
+/* 
+ * void* memory operations
+ */
+EXPORTAPI JSValueRef Hyperloop_Memory_Get_SizeOf_void (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception)
+{
+    return Hyperloop_Memory_Get_SizeOf_int(ctx, object, propertyName, exception);
+}
+EXPORTAPI JSValueRef Hyperloop_Memory_Get_void (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)
+{
+    return Hyperloop_Memory_Get_int(ctx, function, thisObject, argumentCount, arguments, exception);
+}
+EXPORTAPI JSValueRef Hyperloop_Memory_Set_void (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception)
+{
+    return Hyperloop_Memory_Set_int(ctx, function, thisObject, argumentCount, arguments, exception);
+}
+
+
 EXPORTAPI JSValueRef Hyperloop_Binary_IsStrictEqual(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
     if (argumentCount < 2)
     {
