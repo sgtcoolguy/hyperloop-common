@@ -9,9 +9,11 @@
 #ifndef __HYPERLOOP_HEADER__
 #define __HYPERLOOP_HEADER__
 
+#ifndef _WIN32
 // C99 type
 #ifndef _Bool
 #define _Bool bool
+#endif
 #endif
 
 #ifndef HYPERLOOP_EXCLUDE_JSCORE_IMPORT
