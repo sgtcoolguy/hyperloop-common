@@ -433,11 +433,9 @@ EXPORTAPI JSValueRef HyperloopAppRequire(JSValueRef *exception)
 /**
  * called to load the main app for a specific module with moduleid
  */
-EXPORTAPI JSValueRef HyperloopModuleRequire(JSGlobalContextRef ctx, JSValueRef *exception, const char *moduleid)
+EXPORTAPI JSValueRef HyperloopModuleRequire(JSGlobalContextRef ctx, JSValueRef *exception, const char *modulePath)
 {
-    auto path = std::string("/");
-    path+=moduleid;
-    path+="/app.js";
+    auto path = std::string(modulePath);
     auto resolvedPath = requestResolve(nullptr,path.c_str());
     return HyperloopLoadEmbedSource(ctx,nullptr,resolvedPath.c_str(),exception);
 }
