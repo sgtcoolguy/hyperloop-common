@@ -78,8 +78,10 @@ static Appcelerator::Module * JSObjectRefToModule(const JSContextRef & ctx, cons
     return module;
 }
 
-Appcelerator::Module::Module(const JSGlobalContextRef & ctx, const JSObjectRef & object, const std::string & filename, const std::string & dirname, const JSObjectRef & parent, const JSObjectRef & exports) : object{object},filename{filename},dirname{dirname},ctx{ctx},parent{parent},loaded{false},exports{exports},children{nullptr}
+Appcelerator::Module::Module(const JSGlobalContextRef & ctx, const JSObjectRef & object, const std::string & _filename, const std::string & _dirname, const JSObjectRef & parent, const JSObjectRef & exports) : object{object},ctx{ctx},parent{parent},loaded{false},exports{exports},children{nullptr}
 {
+	filename = _filename;
+	dirname = _dirname;
     JSGlobalContextRetain(ctx);
     JSValueProtect(ctx,object);
     if (parent!=nullptr)
@@ -654,8 +656,9 @@ namespace Appcelerator
     class TranslationUnit 
     {
         public:
-            TranslationUnit(const HyperloopTranslationUnitCallback & callback, const std::set<std::string> & sourcemap) : callback{callback},sourcemap{sourcemap}
+            TranslationUnit(const HyperloopTranslationUnitCallback & callback, const std::set<std::string> & _sourcemap) : callback{callback}
             {
+            	sourcemap = _sourcemap;
             }
             inline bool sourceExists(const std::string & name) const 
             {
